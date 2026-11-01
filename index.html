@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e1116">
+<meta name="description" content="FitScan – Free calorie &amp; macro tracker – unlimited barcode scans, no paywall. No account, your data stays on your device.">
+<title>FitScan – Free calorie &amp; macro tracker</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand"><img src="icons/icon-192.png" alt="FitScan"><span class="bname">FitScan</span><span class="sep">·</span><span id="pageTitle">Tagebuch</span></div>
+    <div class="row" style="gap:8px"><button class="icon-btn" id="langBtn" title="Sprache / Language" style="font-size:13px;font-weight:700;width:44px">EN</button><button class="icon-btn" id="themeBtn" title="Hell/Dunkel">◐</button></div>
+  </header>
+  <main id="view"></main>
+  <nav class="tabbar">
+    <button data-tab="diary" class="active"><span class="ti">📖</span>Tagebuch</button>
+    <button data-tab="library"><span class="ti">🔎</span>Lebensmittel</button>
+    <button data-tab="scan" class="fab" aria-label="Scannen"><span>▥</span></button>
+    <button data-tab="progress"><span class="ti">📈</span>Fortschritt</button>
+    <button data-tab="profile"><span class="ti">⚙️</span>Profil</button>
+  </nav>
+</div>
+<div id="sheetBackdrop" class="backdrop hidden"></div>
+<div id="sheet" class="sheet hidden" role="dialog"></div>
+<div id="scanner" class="scanner hidden">
+  <video id="scanVideo" playsinline muted></video>
+  <div class="scan-frame"><div class="scan-line"></div></div>
+  <div class="scan-top"><button class="icon-btn light" id="scanClose">✕</button><span id="scanStatus">Barcode in den Rahmen halten</span><button class="icon-btn light" id="scanTorch" title="Licht">🔦</button></div>
+  <div class="scan-bottom">
+    <button class="btn ghost light" id="scanManual">⌨️ Nummer eingeben</button>
+    <label class="btn ghost light">🖼️ Foto<input type="file" accept="image/*" id="scanFile" hidden></label>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<script src="vendor/chart.umd.min.js"></script>
+<script src="vendor/zxing.min.js"></script>
+<script src="foods.js"></script>
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
