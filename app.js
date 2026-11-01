@@ -183,7 +183,7 @@ function foodSheet(food, { entry = null } = {}) {
 }
 
 // ---------- Open Food Facts ----------
-const OFF_FIELDS = 'code,product_name,product_name_de,generic_name_de,brands,image_front_small_url,image_front_url,nutriments,serving_size,serving_quantity,quantity';
+const OFF_FIELDS = 'code,product_name,product_name_de,generic_name_de,brands,image_front_small_url,image_front_url,nutriments,serving_size,serving_quantity,quantity,countries_tags,nutriscore_grade,nova_group,completeness';
 function parseOFF(p, code) {
   if (!p) return null;
   const nm = p.nutriments || {};

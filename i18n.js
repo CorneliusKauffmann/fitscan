@@ -106,3 +106,51 @@ function applyLang(lang) {
   const observe = () => i18nObs.observe(document.body, { childList: true, subtree: true, characterData: true });
   i18nObs.disconnect(); observe();
 }
+// ---- v2 ----
+Object.assign(I18N_EN, {
+  'Weiter':'Next','Zurück':'Back','Überspringen':'Skip',"Los geht's":"Let's go",'Plan übernehmen':'Use this plan','Deutsch':'Deutsch','English':'English',
+  'Kostenloser Kalorien- & Makro-Tracker. Unbegrenzt scannen, keine Paywall, kein Konto – deine Daten bleiben auf deinem Gerät.':'Free calorie & macro tracker. Unlimited scans, no paywall, no account – your data stays on your device.',
+  'Was ist dein Ziel?':'What is your goal?','Fett verlieren, Muskeln erhalten':'Lose fat, keep muscle','Gewicht halten':'Maintain weight','Gesund essen, Form halten':'Eat healthy, stay in shape','Muskeln & Gewicht zulegen':'Build muscle & gain weight',
+  'Über dich':'About you','Für die Startschätzung deines Verbrauchs. FitScan lernt danach aus deinen echten Daten.':'For the initial estimate of your expenditure. FitScan then learns from your real data.',
+  'Wie aktiv bist du?':'How active are you?','Dein Plan':'Your plan','kcal pro Tag':'kcal per day','Plan übernommen – viel Erfolg! 💪':'Plan saved – good luck! 💪',
+  '📅 Wöchentlicher Check-in':'📅 Weekly check-in','Verbrauch':'Expenditure','Trend/Woche':'Trend/week','Bisher':'Current','Neu':'New','Keine Änderung nötig':'No change needed',
+  'Neue Ziele übernehmen':'Apply new targets','Ziele beibehalten':'Keep targets','Letzte Check-ins':'Recent check-ins','Ziele aktualisiert':'Targets updated','Lege zuerst dein Profil an':'Set up your profile first',
+  'Noch zu wenig Daten – Schätzung per Formel. Logge weiter Essen und Gewicht, dann wird es genauer.':'Not enough data yet – formula estimate. Keep logging food and weight to make it more accurate.',
+  'Wöchentlicher Check-in fällig':'Weekly check-in due','Ziele an deinen echten Verbrauch anpassen':'Adjust targets to your real expenditure','fällig':'due','Check-in starten':'Start check-in','Check-in ansehen':'View check-in',
+  'Noch kein Check-in. FitScan passt dein Kalorienziel jede Woche an deinen gemessenen Verbrauch an.':'No check-in yet. FitScan adjusts your calorie target weekly to your measured expenditure.',
+  '⚡ Schnelleintrag':'⚡ Quick add','Schnelleintrag':'Quick add','Nur Kalorien oder Makros eintragen – z. B. im Restaurant.':'Log just calories or macros – e.g. at a restaurant.','Bezeichnung (optional)':'Label (optional)',
+  'Hinzufügen':'Add','Bitte Kalorien oder Makros eingeben':'Please enter calories or macros','Scannen':'Scan',
+  'Logge heute, um die Serie zu halten':'Log today to keep your streak','↺ Ganzen Tag von gestern kopieren':'↺ Copy all of yesterday',
+  '💧 Wasser':'💧 Water','Glas':'Glass','💧 Wasserziel erreicht!':'💧 Water goal reached!','⏱️ Intervallfasten':'⏱️ Intermittent fasting','Ziel erreicht! 🎉':'Goal reached! 🎉',
+  'Fasten beenden':'End fast','Fasten starten':'Start fast','Fasten gestartet':'Fast started','Fasten beendet':'Fast ended','Starte dein Fastenfenster, wenn du die letzte Mahlzeit gegessen hast.':'Start your fasting window after your last meal.',
+  'Tagesdetails':'Day details','Nährwert':'Nutrient','Ziel':'Goal','Mikronährstoffe':'Micronutrients',
+  'Nur aus Produkten mit Angaben (Open Food Facts). Rechte Spalte: Einträge mit Daten.':'Only from products with data (Open Food Facts). Right column: entries with data.',
+  'Keine Mikronährstoff-Daten für diesen Tag. Gescannte Produkte liefern oft Werte wie Natrium, Calcium oder Vitamine.':'No micronutrient data for this day. Scanned products often provide values like sodium, calcium or vitamins.',
+  'Gesättigte Fettsäuren':'Saturated fat','Natrium':'Sodium','Cholesterin':'Cholesterol','Kalium':'Potassium','Calcium':'Calcium','Eisen':'Iron','Zink':'Zinc','Folat':'Folate','Koffein':'Caffeine',
+  '▥ Scans':'▥ Scans','☑ Mehrfachauswahl':'☑ Multi-select','Hier erscheinen deine gescannten Produkte – auch offline verfügbar.':'Your scanned products appear here – available offline too.',
+  'Hinzugefügt – nächsten Barcode scannen':'Added – scan the next barcode','🔁 Serienscan: an':'🔁 Continuous scan: on','🔁 Serienscan: aus':'🔁 Continuous scan: off',
+  '📊 Diese Woche':'📊 This week','letzte 7 Tage':'last 7 days','Ø Kalorien':'Avg calories','Ø Protein':'Avg protein','Im Zielbereich (±10 %)':'On target (±10%)','Proteinziel erreicht':'Protein goal hit','Tage':'days','Tag':'day',
+  '📏 Körpermaße':'📏 Body measurements','＋ Messen':'＋ Measure','Taille, Hüfte, Brust & Co. zeigen Fortschritt, den die Waage nicht sieht.':'Waist, hips, chest & co. show progress the scale can’t see.',
+  'Taille':'Waist','Hüfte':'Hips','Brust':'Chest','Oberarm':'Upper arm','Oberschenkel':'Thigh','Hals':'Neck','Körperfett %':'Body fat %','Taille (cm)':'Waist (cm)','Hüfte (cm)':'Hips (cm)','Brust (cm)':'Chest (cm)','Oberarm (cm)':'Upper arm (cm)','Oberschenkel (cm)':'Thigh (cm)','Hals (cm)':'Neck (cm)',
+  'Körpermaße':'Body','Wasser':'Water','Bitte mindestens einen Wert eingeben':'Please enter at least one value','Körpermaße in cm, Körperfett rechts in %.':'Body measurements in cm, body fat on the right in %.',
+  'Wasser (L)':'Water (L)','Verbrauch (kcal)':'Expenditure (kcal)','Ø Aufnahme 7T':'Avg intake 7D','Geschätzter Verbrauch aus Aufnahme und Trendgewicht (rollierend, 21–28 Tage).':'Estimated expenditure from intake and trend weight (rolling, 21–28 days).',
+  '🔧 Einstellungen':'🔧 Settings','Wasserziel (ml)':'Water goal (ml)','Glasgröße (ml)':'Glass size (ml)','Ton beim Scannen':'Beep on scan','Serienscan (Produkte direkt hinzufügen, Kamera bleibt offen)':'Continuous scan (add products directly, camera stays open)',
+  '🧭 Einrichtung erneut starten':'🧭 Run setup again','📄 Gewicht CSV':'📄 Body CSV',
+});
+I18N_RULES.unshift(
+  [/^Berechnet aus (\d+) geloggten Tagen und deinem Trendgewicht der letzten (\d+) Tage\.$/, 'Based on $1 logged days and your trend weight over the last $2 days.'],
+  [/^([+-][\d.,]+) kcal pro Tag · P (.+) g · KH (.+) g · F (.+) g$/, '$1 kcal per day · P $2 g · C $3 g · F $4 g'],
+  [/^Keine Änderung nötig · P (.+) g · KH (.+) g · F (.+) g$/, 'No change needed · P $1 g · C $2 g · F $3 g'],
+  [/^≈ (.+) kcal aus Makros$/, '≈ $1 kcal from macros'], [/^✓ (\d+) Lebensmittel \((.+) kcal\) hinzugefügt$/, '✓ $1 foods ($2 kcal) added'], [/^(\d+) ausgewählt$/, '$1 selected'],
+  [/^Seit (.+) · Ziel (\d+) h$/, 'Since $1 · goal $2 h'], [/^noch (\d+) h (\d+) min$/, '$1 h $2 min to go'], [/^Letztes Fasten: (.+) h$/, 'Last fast: $1 h'],
+  [/^Protein (\d+) %$/, 'Protein $1%'], [/^Kohlenhydrate (\d+) %$/, 'Carbs $1%'], [/^Fett (\d+) %$/, 'Fat $1%'], [/^Heute$/, 'Today'],
+  [/^Letzter Check-in: (.+) · Ziel (.+) kcal$/, 'Last check-in: $1 · goal $2 kcal'], [/^(▲|▼)? ?(.+) vs\. Vorwoche$/, '$1 $2 vs. last week'], [/^Ziel (\d+) g$/, 'Goal $1 g'],
+  [/^🔥 Serie: (\d+) Tage · (\d+)\/7 Tage geloggt$/, '🔥 Streak: $1 days · $2/7 days logged'], [/^Zuletzt: (.+) · Veränderung seit (.+)$/, 'Last: $1 · change since $2'],
+  [/^Suche (\d+)…$/, 'Looking up $1…'], [/^(\d+): nicht gefunden$/, '$1: not found'], [/^− (\d+) ml$/, '− $1 ml'], [/^Vom (.+)$/, 'From $1']
+);
+const _trBase = tr;
+tr = function (s) {
+  if (LANG !== 'en' || s == null) return s;
+  const m = String(s).trim().match(/^🔥 (\d+) (Tag|Tage) in Folge$/); if (m) return `🔥 ${m[1]}-day streak`;
+  return _trBase(s);
+};

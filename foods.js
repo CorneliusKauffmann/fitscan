@@ -332,6 +332,181 @@ Tacos|Gerichte|226|9|20|12|3|1.5|80|1 Taco
 Risotto|Gerichte|150|4|22|5|0.8|0.8|300|
 Ratatouille|Gerichte|60|1.3|6|3.5|2|4|250|
 Ofengemüse|Gerichte|85|1.8|9|4.5|3|4|300|
+Leberkäse|Wurst|297|12|3|26|0|1|100|1 Scheibe
+Weißwurst|Wurst|285|11|1|26|0|0.5|80|1 Weißwurst
+Mortadella|Wurst|311|15|1|28|0|1|20|1 Scheibe
+Putenwiener|Wurst|180|14|1|13|0|1|50|1 Würstchen
+Chorizo|Wurst|455|24|2|38|0|1|20|
+Hähnchenbrust Aufschnitt|Wurst|100|21|1|1.5|0|1|20|1 Scheibe
+Rinderhüftsteak|Fleisch|136|23|0|4.5|0|0|200|1 Steak
+Hähnchenflügel|Fleisch|203|18|0|14|0|0|100|
+Hackbraten|Gerichte|210|15|7|14|0.5|1.5|150|1 Scheibe
+Schweinebraten|Gerichte|200|25|1|11|0|0|150|1 Portion
+Sauerbraten|Gerichte|160|22|6|5|0.5|4|200|
+Kassler|Fleisch|160|21|0.5|8|0|0.5|150|
+Döner Teller|Gerichte|180|12|14|8|1.5|2|450|1 Teller
+Dürüm|Gerichte|220|11|22|10|2|2|350|1 Dürüm
+Lahmacun|Gerichte|210|9|30|6|2|2|200|1 Stück
+Flammkuchen|Gerichte|260|8|26|14|1.5|2|300|
+Spätzle|Beilagen|155|5.5|28|2.2|1.5|0.5|200|1 Portion
+Semmelknödel|Beilagen|190|6|33|3.5|2|2|120|1 Knödel
+Kartoffelknödel|Beilagen|115|2|24|1|2|0.5|120|1 Knödel
+Gnocchi|Beilagen|150|3.5|32|0.5|1.5|0.5|200|1 Portion
+Schupfnudeln|Beilagen|170|4|33|2|2|0.5|200|
+Reibekuchen|Gerichte|220|3|25|12|3|1|100|1 Stück
+Rotkohl (Glas)|Gemüse|60|1.2|12|0.5|2|10|150|
+Ofenkartoffel|Beilagen|93|2.5|21|0.1|2.2|1.2|250|1 Kartoffel
+Kartoffelgratin|Gerichte|130|4|11|8|1|1.5|250|
+Reis mit Gemüse|Gerichte|120|3|22|2|1.5|1.5|300|
+Udon-Nudeln gekocht|Beilagen|105|2.6|21|0.4|1|0.3|200|
+Reisnudeln gekocht|Beilagen|108|1.8|24|0.2|1|0|200|
+Glasnudeln gekocht|Beilagen|90|0.1|22|0.1|0.5|0|150|
+Ramen (Instant)|Gerichte|440|9|60|18|2.5|2|80|1 Packung
+Pho|Gerichte|60|4.5|7|1.5|0.5|0.8|500|1 Schale
+Pad Thai|Gerichte|175|8|22|6|1.5|5|350|
+Sushi Nigiri (Lachs)|Gerichte|170|8|25|3.5|0.3|5|35|1 Stück
+Poke Bowl|Gerichte|140|8|18|4|2|3|450|1 Bowl
+Butter Chicken|Gerichte|150|11|5|9.5|1|3|350|
+Paella|Gerichte|155|8|20|4.5|1|1|350|
+Shakshuka|Gerichte|90|5.5|6|5|1.5|4|300|
+Moussaka|Gerichte|140|7|9|8.5|2|3.5|350|
+Gyros|Gerichte|230|19|3|16|0.5|1|200|
+Zaziki|Saucen|110|4|4|8.5|0.3|3.5|50|
+Tahini|Nüsse|595|17|21|54|9|0.5|15|1 EL
+Guacamole|Saucen|155|2|8.5|13|6|1|50|
+Salsa|Saucen|36|1.5|7|0.2|1.8|4|50|
+Aioli|Saucen|640|1|3|70|0|1|15|1 EL
+Remoulade|Saucen|500|1|8|52|0|6|20|
+Hollandaise|Saucen|490|3|5|51|0|1.5|30|
+Currysauce|Saucen|110|1|20|3|1|17|30|
+Süß-sauer-Sauce|Saucen|150|0.4|36|0.2|0.4|30|30|
+Ajvar|Saucen|80|1.4|9|4|2|7|30|
+Kräuterbutter|Fette|630|1|2|69|0|1|10|
+Ghee|Fette|900|0|0|100|0|0|10|1 EL
+Leinöl|Fette|884|0|0|100|0|0|10|1 EL
+Rinderbrühe|Getränke|5|0.6|0.2|0.2|0|0|250|1 Tasse
+Gemüsebrühe|Getränke|6|0.3|1|0.1|0|0.5|250|1 Tasse
+Proteinshake mit Milch|Getränke|85|10|5.5|2.5|0|5.5|330|1 Shake
+Protein-Pudding|Milchprodukte|80|10|6|1.5|0.5|4|200|1 Becher
+Protein-Joghurt|Milchprodukte|60|10|4|0.2|0|4|200|1 Becher
+Skyr Vanille|Milchprodukte|75|9|8|0.2|0|8|150|
+Fruchtjoghurt|Milchprodukte|95|3.2|14|2.8|0.2|13|150|1 Becher
+Grießpudding|Milchprodukte|105|3.5|16|3|0.2|10|150|1 Becher
+Milchreis|Milchprodukte|115|3.3|19|2.8|0.3|9|200|1 Becher
+Kakao (Milch)|Getränke|80|3.5|10|3|0.5|9.5|250|1 Tasse
+Trinkschokolade Pulver|Süßes|380|5|80|3|6|75|15|1 EL
+Ayran|Milchprodukte|35|1.7|2.6|1.8|0|2.6|250|1 Glas
+Burrata|Käse|330|17|1|29|0|1|125|1 Kugel
+Ricotta|Käse|174|11|3|13|0|0.3|50|
+Mascarpone|Käse|429|4.6|4|44|0|3.5|30|
+Bergkäse|Käse|400|29|0|32|0|0|30|1 Scheibe
+Butterkäse|Käse|340|21|0|28|0|0|30|1 Scheibe
+Scheibenkäse light|Käse|260|30|0|16|0|0|25|1 Scheibe
+Schmelzkäse|Käse|260|11|6|21|0|5|20|1 Ecke
+Grillkäse|Käse|320|21|1|26|0|1|100|
+Veganer Käse|Käse|280|1|21|22|0|0|25|1 Scheibe
+Tofu-Würstchen|Hülsenfrüchte|220|16|5|15|2|1|50|
+Vegane Burger-Patty|Hülsenfrüchte|230|17|6|15|3|1|113|1 Patty
+Seitan|Hülsenfrüchte|370|75|14|1.9|0.6|0|100|
+Erbsenprotein-Hack|Hülsenfrüchte|200|17|4|12|3|0.5|125|
+Haferkleie|Getreide|246|17|66|7|15|1.5|30|
+Dinkelflocken|Getreide|355|13|64|2.5|9|1.5|50|
+Puffreis|Getreide|380|7|84|1|1.5|0.5|20|
+Schokomüsli|Getreide|430|8.5|65|14|7|20|50|1 Portion
+Overnight Oats|Gerichte|130|5|18|4|2.5|6|300|1 Glas
+Brezelbrötchen|Brot|265|9|51|2.5|2.5|1|80|1 Stück
+Dinkelbrot|Brot|240|8|44|2|5|2|50|1 Scheibe
+Körnerbrötchen|Brot|285|11|42|7|6|2|70|1 Brötchen
+Ciabatta|Brot|271|9|51|3|2.3|2|80|
+Bagel|Brot|257|10|50|1.5|2.2|5|90|1 Bagel
+Burger-Brötchen|Brot|280|9|49|5|2.4|6|60|1 Brötchen
+Pita|Brot|275|9|56|1.2|2.2|1.3|60|1 Pita
+Hefezopf|Süßes|330|8|52|9|2|14|50|1 Scheibe
+Berliner|Süßes|370|6|47|17|1.5|17|80|1 Berliner
+Franzbrötchen|Süßes|400|6|48|20|1.5|18|90|1 Stück
+Streuselkuchen|Süßes|390|5|52|18|1.3|25|100|1 Stück
+Schwarzwälder Kirschtorte|Süßes|260|4|28|14|1|20|120|1 Stück
+Marmorkuchen|Süßes|400|6|50|19|1.2|28|70|1 Stück
+Brownie|Süßes|466|6|50|27|2.5|36|60|1 Brownie
+Tiramisu|Süßes|280|5|28|16|0.5|22|120|1 Portion
+Lebkuchen|Süßes|380|5|72|7|3|45|25|1 Stück
+Spekulatius|Süßes|480|6|70|19|2|32|10|1 Keks
+Marzipan|Süßes|470|8|56|24|5|50|25|
+Schokoriegel (Snickers-Typ)|Süßes|488|8.6|60|24|2.3|50|50|1 Riegel
+Schokoriegel Waffel (KitKat-Typ)|Süßes|518|6.5|61|27|2|48|42|1 Riegel
+Fruchtgummi vegan|Süßes|330|0.5|80|0.2|0.5|50|25|
+Lakritz|Süßes|375|3.5|83|2|1|40|25|
+Eis am Stiel (Schoko)|Süßes|290|3.5|27|19|1|24|70|1 Stück
+Sorbet|Süßes|130|0.3|32|0|0.5|28|100|1 Kugel
+Frozen Joghurt|Süßes|160|4|30|3|0|26|100|
+Erdnussflips|Snacks|550|14|52|32|4|2|30|
+Reiscracker|Snacks|390|7|83|2|1|2|25|
+Gemüsechips|Snacks|500|4|55|30|10|20|30|
+Beef Jerky|Snacks|300|50|12|5|0|10|25|1 Packung
+Edamame geröstet|Snacks|420|40|30|15|15|3|30|
+Proteinchips|Snacks|420|40|35|13|5|3|30|1 Tüte
+Nussmix ungesalzen|Nüsse|610|19|15|52|8|4|30|1 Handvoll
+Pekannüsse|Nüsse|691|9|14|72|9.6|4|30|
+Pinienkerne|Nüsse|673|14|13|68|3.7|3.6|10|
+Hanfsamen|Nüsse|553|32|9|49|4|1.5|15|1 EL
+Mango getrocknet|Trockenobst|320|2.5|78|1|2.5|66|30|
+Bananenchips|Trockenobst|519|2.3|58|34|7.7|35|30|
+Physalis|Obst|53|1.9|11|0.7|1|0|50|
+Litschi|Obst|66|0.8|17|0.4|1.3|15|100|
+Papaya|Obst|43|0.5|11|0.3|1.7|8|150|
+Maracuja|Obst|97|2.2|23|0.7|10|11|20|1 Frucht
+Clementine|Obst|47|0.9|12|0.2|1.7|9|75|1 Clementine
+Rhabarber|Gemüse|21|0.9|4.5|0.2|1.8|1.1|100|
+Pak Choi|Gemüse|13|1.5|2.2|0.2|1|1.2|150|
+Chinakohl|Gemüse|16|1.2|3.2|0.2|1.2|1.4|150|
+Wirsing|Gemüse|27|2|6|0.1|3.1|2.3|150|
+Pastinake|Gemüse|75|1.2|18|0.3|4.9|4.8|150|
+Steckrübe|Gemüse|37|1.1|8.6|0.2|2.3|4.5|150|
+Topinambur|Gemüse|73|2|17|0|1.6|9.6|100|
+Artischockenherzen|Gemüse|47|3.3|10|0.2|5.4|1|100|
+Kapern|Gemüse|23|2.4|4.9|0.9|3.2|0.4|10|
+Getrocknete Tomaten in Öl|Gemüse|213|5|23|14|5.8|15|20|
+Jalapeños|Gemüse|29|0.9|6.5|0.4|2.8|4|20|
+Kimchi|Gemüse|23|1.1|4|0.5|1.6|1.1|100|
+Sojasprossen|Gemüse|30|3|5.9|0.2|1.8|4|100|
+Algen (Nori)|Gemüse|35|5.8|5.1|0.3|0.3|0.5|3|1 Blatt
+Kokosmilch|Fette|197|2|2.8|21|0|2|100|
+Kokosmilch light|Fette|73|0.7|1.8|7|0|1.5|100|
+Mehrkornbrötchen|Brot|265|10|45|5|6|2|65|1 Brötchen
+Sandwich Thunfisch|Gerichte|230|11|24|10|2|2.5|180|1 Sandwich
+Kartoffelsuppe mit Würstchen|Gerichte|95|4|9|5|1|1|400|1 Teller
+Gulaschsuppe|Gerichte|65|5|5|3|0.8|1.5|400|1 Teller
+Minestrone|Gerichte|40|1.8|6|1|1.5|2|400|1 Teller
+Kürbissuppe|Gerichte|55|1|6|3|1.2|3|400|1 Teller
+Linsen-Dal|Gerichte|120|6|15|4|4|2|350|
+Falafel-Wrap|Gerichte|230|7|29|10|4|3|300|1 Wrap
+Quarkbällchen|Süßes|370|7|45|18|1|18|25|1 Stück
+Käsebrötchen überbacken|Gerichte|300|12|32|13|2|2|90|1 Brötchen
+Fischbrötchen (Matjes)|Gerichte|255|10|22|14|1.5|3|150|1 Brötchen
+Backfisch|Gerichte|230|14|14|13|0.8|0.8|150|
+Lachsfilet gebraten|Fisch|206|22|0|13|0|0|125|1 Filet
+Matjes|Fisch|260|16|0|22|0|0|50|1 Filet
+Tintenfischringe frittiert|Fisch|215|12|17|11|1|0.5|100|
+Miesmuscheln|Fisch|86|12|3.7|2.2|0|0|200|
+Thunfischsteak|Fisch|130|28|0|1.3|0|0|150|
+Zander|Fisch|84|19|0|0.7|0|0|150|
+Tofu geräuchert Aufschnitt|Hülsenfrüchte|170|17|2|10|2|1|20|1 Scheibe
+Weißweinschorle|Getränke|40|0|1.3|0|0|0.5|250|1 Glas
+Radler|Getränke|39|0.3|6|0|0|5.5|500|1 Flasche 0,5 l
+Weizenbier|Getränke|45|0.5|3.5|0|0|0|500|1 Flasche 0,5 l
+Aperol Spritz|Getränke|90|0|9|0|0|8|200|1 Glas
+Gin Tonic|Getränke|85|0|7|0|0|7|250|1 Glas
+Wodka|Getränke|231|0|0|0|0|0|20|1 Shot
+Spezi|Getränke|42|0|10.5|0|0|10.5|500|1 Flasche
+Mate-Limonade|Getränke|26|0|6.5|0|0|6.5|500|1 Flasche
+Iso-Drink|Getränke|25|0|6|0|0|5.5|500|1 Flasche
+Kokoswasser|Getränke|19|0.7|3.7|0.2|1.1|2.6|330|
+Gemüsesaft|Getränke|22|0.9|4|0.2|0.9|3|250|1 Glas
+Multivitaminsaft|Getränke|50|0.3|11.5|0.1|0.2|11|250|1 Glas
+Espresso|Getränke|2|0.1|0|0.2|0|0|30|1 Tasse
+Flat White|Getränke|55|3|4.5|3|0|4.5|180|1 Tasse
+Chai Latte|Getränke|70|2.5|11|2|0|10|300|
+Matcha Latte|Getränke|50|2.6|6|1.8|0|5.5|300|
 `.trim();
 
 const BASE_FOODS = BASE_FOODS_RAW.split('\n').map((l, i) => {
