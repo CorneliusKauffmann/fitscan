@@ -19,13 +19,27 @@ const de = (x, d = 0) => (x ?? 0).toLocaleString(LOC(), { maximumFractionDigits:
 const DEFAULT = () => ({ profile: null, goals: { kcal: 2200, p: 140, c: 240, f: 75, manual: false }, entries: {}, weights: {},
   foods: {}, products: {}, recipes: {}, recents: [], favorites: {}, settings: { theme: 'dark', lang: null } });
 let S = load();
-function load() { try { return Object.assign(DEFAULT(), JSON.parse(localStorage.getItem(KEY)) || {}); } catch { return DEFAULT(); } }
+const isObj = x => x && typeof x === 'object' && !Array.isArray(x);
+const num = (v, min = 0, max = 1e5) => { const x = parseFloat(String(v ?? '').replace(',', '.')); return Number.isFinite(x) ? Math.min(max, Math.max(min, x)) : 0; };
+function sanitize(o) {
+  const d = DEFAULT(); if (!isObj(o)) return d;
+  const s = Object.assign(d, o);
+  for (const k of ['goals', 'entries', 'weights', 'foods', 'products', 'recipes', 'favorites', 'settings']) if (!isObj(s[k])) s[k] = DEFAULT()[k];
+  if (!Array.isArray(s.recents)) s.recents = [];
+  for (const k of ['kcal', 'p', 'c', 'f']) if (!Number.isFinite(+s.goals[k])) s.goals[k] = DEFAULT().goals[k]; else s.goals[k] = +s.goals[k];
+  if (!isObj(s.profile)) s.profile = null;
+  for (const [dk, w] of Object.entries(s.weights)) { const x = +w; if (!/^\d{4}-\d{2}-\d{2}$/.test(dk) || !(x > 0)) delete s.weights[dk]; else s.weights[dk] = x; }
+  for (const [dk, es] of Object.entries(s.entries)) { if (!Array.isArray(es)) { delete s.entries[dk]; continue; } s.entries[dk] = es.filter(e => isObj(e) && isObj(e.food) && isObj(e.food.n) && Number.isFinite(+e.g)); }
+  s.recents = s.recents.filter(f => isObj(f) && isObj(f.n));
+  return s;
+}
+function load() { try { return sanitize(JSON.parse(localStorage.getItem(KEY))); } catch { return DEFAULT(); } }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('Speicher voll – bitte Backup exportieren'); } }
 
 let ui = { tab: 'diary', date: today(), targetMeal: null, libTab: 'search', query: '', results: null, chart: { metric: 'weight', range: 90, type: 'line', smooth: 'ema' } };
 
 // ---------- Nutrition helpers ----------
-const nutr = (food, g) => { const k = g / 100, n = food.n; return { kcal: n.kcal * k, p: n.p * k, c: n.c * k, f: n.f * k, fib: (n.fib || 0) * k, sug: (n.sug || 0) * k, salt: (n.salt || 0) * k }; };
+const nutr = (food, g) => { const k = (+g || 0) / 100, n0 = food?.n || {}, n = { kcal: +n0.kcal || 0, p: +n0.p || 0, c: +n0.c || 0, f: +n0.f || 0, fib: +n0.fib || 0, sug: +n0.sug || 0, salt: +n0.salt || 0 }; return { kcal: n.kcal * k, p: n.p * k, c: n.c * k, f: n.f * k, fib: (n.fib || 0) * k, sug: (n.sug || 0) * k, salt: (n.salt || 0) * k }; };
 function dayTotals(date) {
   const t = { kcal: 0, p: 0, c: 0, f: 0, fib: 0, sug: 0, salt: 0 };
   for (const e of S.entries[date] || []) { const n = nutr(e.food, e.g); for (const k in t) t[k] += n[k]; }
@@ -156,7 +170,7 @@ function foodSheet(food, { entry = null } = {}) {
     <div class="grow"><h2>${esc(food.name)}</h2><div class="mut small">${esc(food.brand || food.cat || '')}${food.code ? ' · ' + esc(food.code) : ''}</div></div>
     <button class="star" id="fsFav" title="Favorit">${I('star', fav ? 'fill' : '')}</button></div>
   <div class="grid4" id="fsLive"></div>
-  <div class="row" style="margin-top:12px"><input class="input" id="fsQty" type="number" inputmode="decimal" min="0" step="any" value="${qty}" style="max-width:110px">
+  <div class="row" style="margin-top:12px"><input class="input" id="fsQty" type="text" inputmode="decimal" autocomplete="off" min="0" step="any" value="${qty}" style="max-width:110px">
     <select class="input" id="fsUnit">${units.map(u => `<option value="${u[0]}" ${u[0] === unit ? 'selected' : ''}>${esc(u[1])}${u[0] !== 'g' && u[0] !== 'ml' ? ' (' + de(u[2]) + ' g)' : ''}</option>`).join('')}</select></div>
   <div class="seg" id="fsMeal" style="margin-top:10px">${MEALS.map(m => `<button data-m="${m[0]}" class="${m[0] === meal ? 'on' : ''}">${I(m[2])}${m[1].replace('essen', '.')}</button>`).join('')}</div>
   <button class="btn block" id="fsSave">${entry ? 'Änderung speichern' : 'Zum Tagebuch hinzufügen'}</button>
@@ -165,15 +179,15 @@ function foodSheet(food, { entry = null } = {}) {
   ${[['Energie', 'kcal', ' kcal', 0], ['Protein', 'p', ' g', 1], ['Kohlenhydrate', 'c', ' g', 1], ['davon Zucker', 'sug', ' g', 1], ['Fett', 'f', ' g', 1], ['Ballaststoffe', 'fib', ' g', 1], ['Salz', 'salt', ' g', 2]]
      .map(([l, k, u, dd]) => `<tr><td>${l}</td><td>${de(n100[k] || 0, dd)}${u}</td>${sv ? `<td>${de(sv[k], dd)}${u}</td>` : ''}</tr>`).join('')}</table>
   ${food.src === 'off' ? '<div class="small mut" style="margin-top:8px">Daten: Open Food Facts (ODbL) – Angaben können unvollständig sein.</div>' : ''}`, sh => {
-    const grams = () => { const u = units.find(x => x[0] === $('#fsUnit').value); return (+$('#fsQty').value || 0) * u[2]; };
+    const grams = () => { const u = units.find(x => x[0] === $('#fsUnit').value); return num($('#fsQty').value, 0, 1e4) * u[2]; };
     const live = () => { const n = nutr(food, grams()); $('#fsLive').innerHTML = [['kcal', 'kcal', 'var(--kcal)'], ['p', 'Protein', 'var(--p)'], ['c', 'Kohlenh.', 'var(--c)'], ['f', 'Fett', 'var(--f)']].map(([k, l, c]) => `<div class="pill"><b style="color:${c}">${de(n[k], k === 'kcal' ? 0 : 1)}</b><span class="small mut">${l}</span></div>`).join(''); };
     $('#fsQty').oninput = live; $('#fsUnit').onchange = () => { const u = $('#fsUnit').value; $('#fsQty').value = u === 'g' || u === 'ml' ? r0(food.serving?.g || 100) : 1; live(); };
     live();
     sh.querySelectorAll('#fsMeal button').forEach(b => b.onclick = () => { meal = b.dataset.m; sh.querySelectorAll('#fsMeal button').forEach(x => x.classList.toggle('on', x === b)); });
     $('#fsFav').onclick = () => { if (S.favorites[food.id]) delete S.favorites[food.id]; else S.favorites[food.id] = { ...food }; save(); $('#fsFav').innerHTML = I('star', S.favorites[food.id] ? 'fill' : ''); };
     $('#fsSave').onclick = () => {
-      const g = grams(); if (!(g > 0)) return toast('Bitte Menge eingeben');
-      const u = units.find(x => x[0] === $('#fsUnit').value), q = +$('#fsQty').value;
+      const g = grams(); if (!(g > 0)) return toast('Bitte Menge eingeben'); if (g > 2e4) return toast('Menge zu groß');
+      const u = units.find(x => x[0] === $('#fsUnit').value), q = num($('#fsQty').value, 0, 1e4);
       const label = u[0] === 'g' ? `${de(q)} g` : u[0] === 'ml' ? `${de(q)} ml` : `${de(q, q % 1 ? 1 : 0)} × ${u[1]}`;
       if (entry) Object.assign(entry, { g, label, meal, unit: u[0], qty: q });
       else { addEntry(food, g, label, meal); const e = S.entries[ui.date].at(-1); e.unit = u[0]; e.qty = q; }
@@ -292,7 +306,7 @@ async function doSearch(now) {
 // ---------- Custom foods & recipes ----------
 function customFoodSheet(f = null, code = '') {
   const n = f?.n || {};
-  const fld = (id, l, val = '') => `<div><label class="f">${l}</label><input class="input" id="${id}" type="number" inputmode="decimal" step="any" value="${val ?? ''}"></div>`;
+  const fld = (id, l, val = '') => `<div><label class="f">${l}</label><input class="input" id="${id}" type="text" inputmode="decimal" autocomplete="off" step="any" value="${val ?? ''}"></div>`;
   openSheet(`<h2>${f ? 'Lebensmittel bearbeiten' : 'Eigenes Lebensmittel'}</h2>${code ? `<div class="small mut">Barcode ${esc(code)} wurde bei Open Food Facts nicht gefunden – trage die Werte von der Verpackung ein. Beim nächsten Scan wird es automatisch erkannt.</div>` : ''}
   <label class="f">Name</label><input class="input" id="cfName" value="${esc(f?.name || '')}" placeholder="z. B. Omas Apfelkuchen">
   <label class="f">Marke (optional)</label><input class="input" id="cfBrand" value="${esc(f?.brand || '')}">
@@ -301,7 +315,7 @@ function customFoodSheet(f = null, code = '') {
   <button class="btn block" id="cfSave" style="margin-top:14px">Speichern</button>${f ? '<button class="btn block ghost" id="cfDel" style="margin-top:8px;color:var(--danger)">Löschen</button>' : ''}`, () => {
     $('#cfSave').onclick = () => {
       const name = $('#cfName').value.trim(); if (!name) return toast('Bitte Namen eingeben');
-      const v = id => +String($('#' + id).value).replace(',', '.') || 0;
+      const v = id => num($('#' + id).value, 0, id === 'cfK' ? 900 : id === 'cfServ' ? 5000 : 100);
       const id = f?.id || (code ? 'cust:' + code : 'cust:' + uid());
       const food = { id, src: 'custom', code: code || f?.code || '', name, brand: $('#cfBrand').value.trim(), cat: 'Eigene', n: { kcal: v('cfK'), p: v('cfP'), c: v('cfC'), f: v('cfF'), sug: v('cfS'), fib: v('cfB'), salt: v('cfSa') }, serving: v('cfServ') ? { g: v('cfServ'), label: 'Portion' } : null };
       S.foods[id] = food; if (food.code) S.products[food.code] = { ...food }; save(); closeSheet(); toast('Gespeichert'); foodSheet(food);
@@ -322,13 +336,13 @@ function recipeSheet(r = null) {
     const f = recipeFood(rec);
     openSheet(`<h2>${r ? 'Gericht bearbeiten' : 'Neues Gericht'}</h2>
     <label class="f">Name</label><input class="input" id="rName" value="${esc(rec.name)}" placeholder="z. B. Protein-Porridge">
-    <label class="f">Anzahl Portionen</label><input class="input" id="rPort" type="number" min="1" step="any" value="${rec.portions}">
-    <div class="card" style="margin-top:12px;padding:6px 12px">${rec.items.map((it, i) => `<div class="entry"><div class="grow"><div class="nm">${esc(it.food.name)}</div><div class="small mut">${de(nutr(it.food, it.g).kcal)} kcal</div></div><input class="input" data-ig="${i}" type="number" value="${it.g}" style="width:84px;padding:8px"> g<button class="icon-btn" data-ir="${i}">${I('x')}</button></div>`).join('') || '<div class="empty small">Noch keine Zutaten</div>'}</div>
+    <label class="f">Anzahl Portionen</label><input class="input" id="rPort" type="text" inputmode="decimal" autocomplete="off" min="1" step="any" value="${rec.portions}">
+    <div class="card" style="margin-top:12px;padding:6px 12px">${rec.items.map((it, i) => `<div class="entry"><div class="grow"><div class="nm">${esc(it.food.name)}</div><div class="small mut">${de(nutr(it.food, it.g).kcal)} kcal</div></div><input class="input" data-ig="${i}" type="text" inputmode="decimal" autocomplete="off" value="${it.g}" style="width:84px;padding:8px"> g<button class="icon-btn" data-ir="${i}">${I('x')}</button></div>`).join('') || '<div class="empty small">Noch keine Zutaten</div>'}</div>
     <div class="search"><input class="input" id="rq" placeholder="Zutat suchen (offline-Bibliothek & Eigene)…"></div><div id="rRes"></div>
     ${rec.items.length ? `<div class="grid4" style="margin:10px 0">${[['kcal', 'kcal/Port.'], ['p', 'Protein'], ['c', 'KH'], ['f', 'Fett']].map(([k, l]) => `<div class="pill"><b>${de(nutr(f, f.serving.g)[k])}</b><span class="small mut">${l}</span></div>`).join('')}</div>` : ''}
     <button class="btn block" id="rSave">Gericht speichern</button>${r ? '<button class="btn block ghost" id="rDel" style="margin-top:8px;color:var(--danger)">Löschen</button>' : ''}`, () => {
-      $('#rName').oninput = e => rec.name = e.target.value; $('#rPort').oninput = e => rec.portions = Math.max(1, +e.target.value || 1);
-      document.querySelectorAll('[data-ig]').forEach(i => i.onchange = () => { rec.items[+i.dataset.ig].g = +i.value || 0; draw(); });
+      $('#rName').oninput = e => rec.name = e.target.value; $('#rPort').oninput = e => rec.portions = Math.max(1, num(e.target.value, 0, 100) || 1);
+      document.querySelectorAll('[data-ig]').forEach(i => i.onchange = () => { rec.items[+i.dataset.ig].g = num(i.value, 0, 1e4); draw(); });
       document.querySelectorAll('[data-ir]').forEach(b => b.onclick = () => { rec.items.splice(+b.dataset.ir, 1); draw(); });
       $('#rq').oninput = e => { const res = e.target.value.trim() ? localSearch(e.target.value).slice(0, 8) : [];
         $('#rRes').innerHTML = res.map(x => `<div class="food" data-add="${esc(x.id)}"><div class="grow"><div class="nm">${esc(x.name)}</div><div class="small mut">${de(x.n.kcal)} kcal/100 g</div></div><span class="qa" style="display:flex;align-items:center;justify-content:center">${I('plus')}</span></div>`).join('');
@@ -403,10 +417,10 @@ function weightSheet(d = today()) {
   const cur = S.weights[d], last = S.weights[Object.keys(S.weights).sort().filter(x => x <= d).pop()] || S.profile?.weight || 75;
   openSheet(`<h2>Gewicht eintragen</h2><div class="small mut">${fmtDate(d)}</div>
   <label class="f">Datum</label><input class="input" id="wDate" type="date" value="${d}" max="${today()}">
-  <div class="row" style="margin-top:12px;justify-content:center"><button class="icon-btn" id="wM">${I('minus')}</button><input class="input" id="wVal" type="number" step="0.1" inputmode="decimal" value="${cur ?? r1(last)}" style="max-width:140px;text-align:center;font-size:26px;font-weight:800"><span class="mut">kg</span><button class="icon-btn" id="wP">${I('plus')}</button></div>
+  <div class="row" style="margin-top:12px;justify-content:center"><button class="icon-btn" id="wM">${I('minus')}</button><input class="input" id="wVal" type="text" inputmode="decimal" autocomplete="off" step="0.1" inputmode="decimal" value="${cur ?? r1(last)}" style="max-width:140px;text-align:center;font-size:26px;font-weight:800"><span class="mut">kg</span><button class="icon-btn" id="wP">${I('plus')}</button></div>
   <button class="btn block" id="wSave" style="margin-top:14px">Speichern</button>${cur ? '<button class="btn block ghost" id="wDel" style="margin-top:8px;color:var(--danger)">Eintrag löschen</button>' : ''}`, () => {
-    const vi = $('#wVal'); $('#wM').onclick = () => vi.value = r1(+vi.value - 0.1); $('#wP').onclick = () => vi.value = r1(+vi.value + 0.1);
-    $('#wSave').onclick = () => { const w = +String(vi.value).replace(',', '.'); if (!(w > 20 && w < 400)) return toast('Bitte gültiges Gewicht'); S.weights[$('#wDate').value] = r1(w); if (S.profile) S.profile.weight = r1(w); save(); closeSheet(); render(); toast('Gewicht gespeichert'); };
+    const vi = $('#wVal'); $('#wM').onclick = () => vi.value = r1(num(vi.value, 0, 400) - 0.1); $('#wP').onclick = () => vi.value = r1(num(vi.value, 0, 400) + 0.1);
+    $('#wSave').onclick = () => { const w = num(vi.value, 0, 1e4); if (!(w > 20 && w < 400)) return toast('Bitte gültiges Gewicht'); S.weights[$('#wDate').value] = r1(w); if (S.profile) S.profile.weight = r1(w); save(); closeSheet(); render(); toast('Gewicht gespeichert'); };
     if (cur) $('#wDel').onclick = () => { delete S.weights[d]; save(); closeSheet(); render(); };
   });
 }
@@ -499,13 +513,13 @@ function renderProfile(v) {
   const p = S.profile || { sex: 'm', age: 30, height: 180, weight: 80, activity: 1.375, goal: 'lose', rate: 0.5 }, g = S.goals, calc = computeGoals(p);
   v.innerHTML = `<div class="card"><h3><span>${I('target')}Profil & Ziel</span></h3>
   <div class="seg" id="pSex"><button data-v="m" class="${p.sex === 'm' ? 'on' : ''}">Männlich</button><button data-v="f" class="${p.sex === 'f' ? 'on' : ''}">Weiblich</button></div>
-  <div class="grid3"><div><label class="f">Alter</label><input class="input" id="pAge" type="number" value="${p.age}"></div><div><label class="f">Größe (cm)</label><input class="input" id="pH" type="number" value="${p.height}"></div><div><label class="f">Gewicht (kg)</label><input class="input" id="pWt" type="number" step="0.1" value="${p.weight}"></div></div>
+  <div class="grid3"><div><label class="f">Alter</label><input class="input" id="pAge" type="text" inputmode="decimal" autocomplete="off" value="${p.age}"></div><div><label class="f">Größe (cm)</label><input class="input" id="pH" type="text" inputmode="decimal" autocomplete="off" value="${p.height}"></div><div><label class="f">Gewicht (kg)</label><input class="input" id="pWt" type="text" inputmode="decimal" autocomplete="off" step="0.1" value="${p.weight}"></div></div>
   <label class="f">Aktivität</label><select class="input" id="pAct">${ACT.map(a => `<option value="${a[0]}" ${+p.activity === a[0] ? 'selected' : ''}>${a[1]}</option>`).join('')}</select>
   <label class="f">Ziel</label><div class="seg" id="pGoal">${[['lose', 'Abnehmen'], ['maintain', 'Halten'], ['gain', 'Aufbauen']].map(x => `<button data-v="${x[0]}" class="${p.goal === x[0] ? 'on' : ''}">${x[1]}</button>`).join('')}</div>
   <div id="pRateBox" class="${p.goal === 'maintain' ? 'hidden' : ''}"><label class="f">Tempo: <b id="pRateL">${de(p.rate, 2)} kg/Woche</b></label><input id="pRate" type="range" min="0.1" max="1" step="0.05" value="${p.rate}" style="width:100%;accent-color:var(--acc)"></div>
   <div class="small mut" id="pCalc" style="margin:8px 0"></div><button class="btn block" id="pSave">Ziele berechnen & übernehmen</button></div>
   <div class="card"><h3><span>${I('pen')}Tagesziele (manuell)</span></h3><div class="grid2">
-  ${[['gK', 'Kalorien (kcal)', g.kcal], ['gP', 'Protein (g)', g.p], ['gC', 'Kohlenhydrate (g)', g.c], ['gF', 'Fett (g)', g.f]].map(x => `<div><label class="f">${x[1]}</label><input class="input" id="${x[0]}" type="number" value="${x[2]}"></div>`).join('')}</div>
+  ${[['gK', 'Kalorien (kcal)', g.kcal], ['gP', 'Protein (g)', g.p], ['gC', 'Kohlenhydrate (g)', g.c], ['gF', 'Fett (g)', g.f]].map(x => `<div><label class="f">${x[1]}</label><input class="input" id="${x[0]}" type="text" inputmode="decimal" autocomplete="off" value="${x[2]}"></div>`).join('')}</div>
   <div class="small mut" id="gSum" style="margin-top:6px"></div><button class="btn block ghost" id="gSave" style="margin-top:10px">Ziele speichern</button></div>
   <div class="card"><h3><span>${I('database')}Daten</span></h3><div class="small mut" style="margin-bottom:10px">Alles bleibt auf diesem Gerät – kein Konto, keine Cloud, keine Paywall. Mach ab und zu ein Backup.</div>
   <div class="grid2"><button class="btn ghost" id="exJson">${I('download')}Backup (JSON)</button><label class="btn ghost">${I('upload')}Import<input type="file" id="imJson" accept=".json,application/json" hidden></label>
@@ -514,7 +528,7 @@ function renderProfile(v) {
   <button class="btn danger block" id="wipe" style="margin-top:8px">Alle Daten löschen</button>
   <div class="small mut" style="margin-top:10px">${Object.keys(S.products).length} Produkte offline gespeichert · ${BASE_FOODS.length} Basis-Lebensmittel · Produktdaten von <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener" style="color:var(--acc)">Open Food Facts</a></div></div>
   <div class="small mut" style="text-align:center;padding:6px 0 20px">FitScan · 100 % kostenlos · Unbegrenzt scannen</div>`;
-  const read = () => ({ sex: $('#pSex .on').dataset.v, age: +$('#pAge').value, height: +$('#pH').value, weight: +$('#pWt').value, activity: +$('#pAct').value, goal: $('#pGoal .on').dataset.v, rate: +$('#pRate').value });
+  const read = () => ({ sex: $('#pSex .on').dataset.v, age: num($('#pAge').value, 14, 100) || 30, height: num($('#pH').value, 120, 230) || 175, weight: num($('#pWt').value, 30, 300) || 75, activity: +$('#pAct').value, goal: $('#pGoal .on').dataset.v, rate: +$('#pRate').value });
   const upd = () => { const q = read(), c = computeGoals(q); $('#pRateL').textContent = de(q.rate, 2) + ' kg/Woche'; $('#pRateBox').classList.toggle('hidden', q.goal === 'maintain');
     $('#pCalc').innerHTML = `Grundumsatz ${de(c.bmr)} kcal · Gesamtumsatz ≈ ${de(c.tdee)} kcal<br>→ Ziel <b style="color:var(--txt)">${de(c.kcal)} kcal</b> · P ${c.p} g · KH ${c.c} g · F ${c.f} g`; };
   ['#pSex', '#pGoal'].forEach(s => v.querySelectorAll(s + ' button').forEach(b => b.onclick = () => { v.querySelectorAll(s + ' button').forEach(x => x.classList.toggle('on', x === b)); upd(); }));
@@ -522,13 +536,13 @@ function renderProfile(v) {
   $('#pSave').onclick = () => { const q = read(); if (!(q.age > 10 && q.height > 100 && q.weight > 30)) return toast('Bitte Werte prüfen'); S.profile = q; const c = computeGoals(q); S.goals = { kcal: c.kcal, p: c.p, c: c.c, f: c.f, manual: false }; if (!S.weights[today()]) S.weights[today()] = q.weight; save(); render(); toast('Ziele übernommen'); };
   const gs = () => { const k = +$('#gP').value * 4 + +$('#gC').value * 4 + +$('#gF').value * 9; $('#gSum').textContent = `Makros ergeben ${de(k)} kcal (Ziel ${de(+$('#gK').value)} kcal)`; };
   v.querySelectorAll('#gK,#gP,#gC,#gF').forEach(i => i.oninput = gs); gs();
-  $('#gSave').onclick = () => { S.goals = { kcal: +$('#gK').value || 2000, p: +$('#gP').value || 0, c: +$('#gC').value || 0, f: +$('#gF').value || 0, manual: true }; save(); toast('Gespeichert'); };
+  $('#gSave').onclick = () => { const k = num($('#gK').value, 0, 10000); S.goals = { kcal: k >= 800 ? Math.round(k) : 2000, p: Math.round(num($('#gP').value, 0, 1000)), c: Math.round(num($('#gC').value, 0, 1500)), f: Math.round(num($('#gF').value, 0, 1000)), manual: true }; save(); toast('Gespeichert'); };
   $('#exJson').onclick = () => download(`fitscan-backup-${today()}.json`, JSON.stringify({ app: 'fitscan', version: 1, exported: new Date().toISOString(), data: S }, null, 1), 'application/json');
   $('#exCsv').onclick = () => { const rows = [['Datum', 'Mahlzeit', 'Lebensmittel', 'Marke', 'Menge (g)', 'kcal', 'Protein (g)', 'Kohlenhydrate (g)', 'Fett (g)', 'Zucker (g)', 'Ballaststoffe (g)', 'Salz (g)']];
     for (const d of Object.keys(S.entries).sort()) for (const e of S.entries[d]) { const n = nutr(e.food, e.g); rows.push([d, MEALS.find(m => m[0] === e.meal)[1], e.food.name, e.food.brand, r1(e.g), r0(n.kcal), r1(n.p), r1(n.c), r1(n.f), r1(n.sug), r1(n.fib), r1(n.salt)]); }
     download(`fitscan-diary-${today()}.csv`, csv(rows), 'text/csv'); };
   $('#exCsvW').onclick = () => { const ws = weightSeries(); download(`fitscan-weight-${today()}.csv`, csv([['Datum', 'Gewicht (kg)', 'Trend (kg)'], ...Object.keys(S.weights).sort().map(d => [d, S.weights[d], r1(trendAt(ws, d))])]), 'text/csv'); };
-  $('#imJson').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { const j = JSON.parse(await f.text()); const data = j.data || j; if (!data.entries || !data.goals) throw 0; if (!confirm(tr('Backup importieren? Aktuelle Daten werden ersetzt.'))) return; S = Object.assign(DEFAULT(), data); save(); setTheme(S.settings.theme); render(); toast('Backup importiert'); } catch { toast('Ungültige Backup-Datei'); } };
+  $('#imJson').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { const j = JSON.parse(await f.text()); const data = j.data || j; if (!data.entries || !data.goals) throw 0; if (!confirm(tr('Backup importieren? Aktuelle Daten werden ersetzt.'))) return; S = sanitize(data); migrate(); save(); setTheme(S.settings.theme); render(); toast('Backup importiert'); } catch { toast('Ungültige Backup-Datei'); } };
   $('#demo').onclick = () => { if (Object.keys(S.entries).length && !confirm(tr('Demo-Daten zu deinen Daten hinzufügen?'))) return; seedDemo(); toast('Demo-Daten geladen'); go('progress'); };
   $('#wipe').onclick = () => { if (!confirm(tr('Wirklich ALLE Daten löschen? Das kann nicht rückgängig gemacht werden.'))) return; const th = S.settings.theme; S = DEFAULT(); S.settings.theme = th; save(); render(); toast('Alle Daten gelöscht'); };
 }

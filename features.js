@@ -8,9 +8,17 @@ function migrate() {
   S.settings.waterGoal ||= 2500; S.settings.glass ||= 250; S.settings.fastTarget ||= 16; S.settings.checkinDay ??= 1;
   S.settings.continuousScan ??= false; S.settings.beep ??= true;
   if (S.profile && S.settings.onboarded == null) S.settings.onboarded = true;
+  for (const k of ['water', 'measures']) if (typeof S[k] !== 'object' || Array.isArray(S[k]) || !S[k]) S[k] = {};
+  for (const k of ['checkins', 'scanHistory', 'fastLog']) if (!Array.isArray(S[k])) S[k] = [];
+  if (S.fast && !(+S.fast.start > 0 && +S.fast.start <= Date.now())) S.fast = null;
+  S.fastLog = S.fastLog.filter(x => x && Number.isFinite(+x.h));
   S.version = 2; save();
 }
 migrate();
+// Datum nach Mitternacht weiterschalten, wenn die App offen bleibt
+let _lastToday = today();
+const _dayTick = () => { const t = today(); if (t !== _lastToday) { if (ui.date === _lastToday) ui.date = t; _lastToday = t; if (!document.getElementById('onb')) render(); } };
+setInterval(_dayTick, 60000); document.addEventListener('visibilitychange', () => { if (!document.hidden) _dayTick(); });
 
 // ---------- Helpers ----------
 const beep = () => { if (!S.settings.beep) return; try { const a = new (window.AudioContext || window.webkitAudioContext)(), o = a.createOscillator(), g = a.createGain(); o.type = 'sine'; o.frequency.value = 1320; g.gain.setValueAtTime(.18, a.currentTime); g.gain.exponentialRampToValueAtTime(.001, a.currentTime + .14); o.connect(g).connect(a.destination); o.start(); o.stop(a.currentTime + .15); setTimeout(() => a.close(), 300); } catch {} };
@@ -78,7 +86,7 @@ function onboarding(step = 0, d = null) {
     .map(o => `<button class="opt ${d.goal === o[0] ? 'on' : ''}" data-v="${o[0]}"><span class="oi">${o[1]}</span><span><b>${o[2]}</b><br><span class="small mut">${o[3]}</span></span></button>`).join('')}</div>${nav()}`;
   if (step === 2) body = `<h2>Über dich</h2><p class="small mut">Für die Startschätzung deines Verbrauchs. FitScan lernt danach aus deinen echten Daten.</p>
     <div class="seg" id="oSex"><button data-v="m" class="${d.sex === 'm' ? 'on' : ''}">Männlich</button><button data-v="f" class="${d.sex === 'f' ? 'on' : ''}">Weiblich</button></div>
-    <div class="grid3"><div><label class="f">Alter</label><input class="input" id="oAge" type="number" value="${d.age}"></div><div><label class="f">Größe (cm)</label><input class="input" id="oH" type="number" value="${d.height}"></div><div><label class="f">Gewicht (kg)</label><input class="input" id="oW" type="number" step="0.1" value="${d.weight}"></div></div>${nav()}`;
+    <div class="grid3"><div><label class="f">Alter</label><input class="input" id="oAge" type="text" inputmode="decimal" autocomplete="off" value="${d.age}"></div><div><label class="f">Größe (cm)</label><input class="input" id="oH" type="text" inputmode="decimal" autocomplete="off" value="${d.height}"></div><div><label class="f">Gewicht (kg)</label><input class="input" id="oW" type="text" inputmode="decimal" autocomplete="off" step="0.1" value="${d.weight}"></div></div>${nav()}`;
   if (step === 3) body = `<h2>Wie aktiv bist du?</h2><div class="opts">${ACT.map(a => `<button class="opt ${+d.activity === a[0] ? 'on' : ''}" data-v="${a[0]}"><span>${a[1]}</span></button>`).join('')}</div>${nav()}`;
   if (step === 4) { const c = computeGoals(d);
     body = `<h2>Dein Plan</h2>${d.goal !== 'maintain' ? `<label class="f">Tempo: <b id="oRL">${de(d.rate, 2)} kg/Woche</b></label><input id="oRate" type="range" min="0.1" max="1" step="0.05" value="${d.rate}" style="width:100%;accent-color:var(--acc)">` : ''}
@@ -87,7 +95,7 @@ function onboarding(step = 0, d = null) {
     <p class="small mut" id="oInfo">Geschätzter Verbrauch ≈ ${de(c.tdee)} kcal. Jede Woche passt der Check-in dein Ziel an deinen gemessenen Verbrauch an.</p></div>${nav(true, 'Plan übernehmen')}`; }
   el.innerHTML = `<div class="onb-card">${dots}${body}</div>`;
   const q = s => el.querySelector(s);
-  const read = () => { if (q('#oAge')) Object.assign(d, { age: +q('#oAge').value, height: +q('#oH').value, weight: +q('#oW').value, sex: q('#oSex .on').dataset.v }); };
+  const read = () => { if (q('#oAge')) Object.assign(d, { age: num(q('#oAge').value, 14, 100) || 30, height: num(q('#oH').value, 120, 230) || 175, weight: num(q('#oW').value, 30, 300) || 75, sex: q('#oSex .on').dataset.v }); };
   el.querySelectorAll('.opt').forEach(b => b.onclick = () => { el.querySelectorAll('.opt').forEach(x => x.classList.toggle('on', x === b)); if (step === 1) d.goal = b.dataset.v; else d.activity = +b.dataset.v; });
   el.querySelectorAll('#oSex button').forEach(b => b.onclick = () => el.querySelectorAll('#oSex button').forEach(x => x.classList.toggle('on', x === b)));
   el.querySelectorAll('#oLang button').forEach(b => b.onclick = () => { setLang(b.dataset.v); save(); onboarding(0, d); });
@@ -141,11 +149,11 @@ function quickAddSheet(meal) {
   meal ||= ui.targetMeal || mealDefault();
   openSheet(`<h2>${I('zap')}Schnelleintrag</h2><p class="small mut">Nur Kalorien oder Makros eintragen – z. B. im Restaurant.</p>
   <label class="f">Bezeichnung (optional)</label><input class="input" id="qaN" placeholder="Schnelleintrag">
-  <div class="grid2">${[['qaK', 'Kalorien (kcal)'], ['qaP', 'Protein (g)'], ['qaC', 'Kohlenhydrate (g)'], ['qaF', 'Fett (g)']].map(x => `<div><label class="f">${x[1]}</label><input class="input" id="${x[0]}" type="number" inputmode="decimal" step="any"></div>`).join('')}</div>
+  <div class="grid2">${[['qaK', 'Kalorien (kcal)'], ['qaP', 'Protein (g)'], ['qaC', 'Kohlenhydrate (g)'], ['qaF', 'Fett (g)']].map(x => `<div><label class="f">${x[1]}</label><input class="input" id="${x[0]}" type="text" inputmode="decimal" autocomplete="off" step="any"></div>`).join('')}</div>
   <div class="small mut" id="qaHint" style="margin-top:6px"></div>
   <div class="seg" id="qaM" style="margin-top:10px">${MEALS.map(m => `<button data-m="${m[0]}" class="${m[0] === meal ? 'on' : ''}">${I(m[2])}${m[1].replace('essen', '.')}</button>`).join('')}</div>
   <button class="btn block" id="qaSave">Hinzufügen</button>`, sh => {
-    const v = id => +String($('#' + id).value).replace(',', '.') || 0;
+    const v = id => num($('#' + id).value, 0, id === 'qaK' ? 20000 : 2000);
     const hint = () => { const k = v('qaP') * 4 + v('qaC') * 4 + v('qaF') * 9; $('#qaHint').textContent = k && !v('qaK') ? `≈ ${de(k)} kcal aus Makros` : ''; };
     sh.querySelectorAll('#qaP,#qaC,#qaF,#qaK').forEach(i => i.oninput = hint);
     sh.querySelectorAll('#qaM button').forEach(b => b.onclick = () => { meal = b.dataset.m; sh.querySelectorAll('#qaM button').forEach(x => x.classList.toggle('on', x === b)); });
@@ -178,13 +186,13 @@ renderDiary = function (v) {
   const ml = S.water[d] || 0, goal = S.settings.waterGoal, gl = S.settings.glass, n = Math.max(8, Math.ceil(goal / gl));
   const wcard = `<div class="card"><h3><span>${I('drop')}Wasser</span><span class="kc mut small">${de(ml / 1000, 2)} / ${de(goal / 1000, 1)} L</span></h3>
     <div class="glasses">${Array.from({ length: n }, (_, i) => `<button class="glass ${i < Math.round(ml / gl) ? 'on' : ''}" data-gi="${i}" aria-label="Glas"></button>`).join('')}</div>
-    <div class="row" style="margin-top:8px"><button class="btn ghost sm" id="wMinus">${I('minus')}${gl} ml</button><div class="grow bar"><i style="width:${Math.min(100, ml / goal * 100)}%;background:#3ba7ff"></i></div><button class="btn sm" id="wPlus">${I('plus')}${gl} ml</button></div></div>`;
+    <div class="row" style="margin-top:8px"><button class="btn ghost sm" id="wMinus">${I('minus')}${gl} ml</button><div class="grow bar"><i style="width:${Math.min(100, ml / goal * 100)}%;background:#06b6d4"></i></div><button class="btn sm" id="wPlus">${I('plus')}${gl} ml</button></div></div>`;
   // Fasten
   const f = S.fast, tgt = S.settings.fastTarget;
   const el = f ? (Date.now() - f.start) / 36e5 : 0;
-  const fcard = `<div class="card"><h3><span>${I('timer')}Intervallfasten</span><select class="input" id="fTgt" style="width:auto;padding:6px 10px">${[12, 14, 16, 18, 20, 24].map(h => `<option value="${h}" ${h === tgt ? 'selected' : ''}>${h}:${24 - h > 0 ? 24 - h : 0}</option>`).join('')}</select></h3>
+  const fcard = `<div class="card"><h3><span>${I('timer')}Intervallfasten</span><select class="input" id="fTgt" style="width:auto;padding:6px 10px">${[12, 14, 16, 18, 20, 24].map(h => `<option value="${h}" ${h === tgt ? 'selected' : ''}>${h}:${24 - h}</option>`).join('')}</select></h3>
     ${f ? `<div class="row"><div class="ring" style="width:84px;height:84px">${ring(el, tgt, 84, 9, 'var(--acc2)')}<div class="center"><b id="fEl">${Math.floor(el)}:${String(Math.floor(el % 1 * 60)).padStart(2, '0')}</b></div></div>
-      <div class="grow"><div class="small mut">Seit ${new Date(f.start).toLocaleTimeString(LOC(), { hour: '2-digit', minute: '2-digit' })} · Ziel ${tgt} h</div><div><b>${el >= tgt ? 'Ziel erreicht!' : `noch ${Math.floor(tgt - el)} h ${Math.round((tgt - el) % 1 * 60)} min`}</b></div><button class="btn sm" id="fStop" style="margin-top:8px">Fasten beenden</button></div></div>`
+      <div class="grow"><div class="small mut">Seit ${new Date(f.start).toLocaleTimeString(LOC(), { hour: '2-digit', minute: '2-digit' })} · Ziel ${tgt} h</div><div><b>${el >= tgt ? 'Ziel erreicht!' : `noch ${Math.floor(Math.ceil((tgt - el) * 60) / 60)} h ${Math.ceil((tgt - el) * 60) % 60} min`}</b></div><button class="btn sm" id="fStop" style="margin-top:8px">Fasten beenden</button></div></div>`
       : `<div class="row"><div class="grow small mut">${S.fastLog.length ? `Letztes Fasten: ${de(S.fastLog.at(-1).h, 1)} h` : 'Starte dein Fastenfenster, wenn du die letzte Mahlzeit gegessen hast.'}</div><button class="btn sm" id="fStart">Fasten starten</button></div>`}</div>`;
   const wcardEl = v.querySelector('#dWeight')?.closest('.card');
   wcardEl?.insertAdjacentHTML('beforebegin', wcard); wcardEl?.insertAdjacentHTML('afterend', fcard);
@@ -237,7 +245,7 @@ renderLibrary = function (v) {
   const chips = v.querySelector('.chips');
   chips.insertAdjacentHTML('beforeend', `<button class="chip ${ui.libTab === 'scans' ? 'on' : ''}" data-lt2="scans">${I('scan')}Scans</button>`);
   chips.querySelector('[data-lt2]').onclick = () => { ui.libTab = 'scans'; render(); };
-  v.querySelector('.search').insertAdjacentHTML('afterend', `<div class="row" style="margin:-2px 0 8px;gap:8px"><button class="btn ghost sm" id="lQuick">${I('zap')}Schnelleintrag</button><button class="btn ghost sm ${multi ? 'onb2' : ''}" id="lMulti">${I('checksq')}Mehrfachauswahl</button></div>`);
+  v.querySelector('.search').insertAdjacentHTML('afterend', `<div class="row wrap" style="margin:-2px 0 8px;gap:8px"><button class="btn ghost sm" id="lQuick">${I('zap')}Schnelleintrag</button><button class="btn ghost sm ${multi ? 'onb2' : ''}" id="lMulti">${I('checksq')}Mehrfachauswahl</button></div>`);
   $('#lQuick').onclick = () => quickAddSheet(); $('#lMulti').onclick = () => { multi = !multi; picked.clear(); render(); };
 };
 const _fillLibList = fillLibList;
@@ -351,7 +359,7 @@ renderProgress = function (v) {
 function measureSheet(d = today()) {
   const cur = S.measures[d] || {}, last = S.measures[Object.keys(S.measures).sort().pop()] || {};
   openSheet(`<h2>${I('ruler')}Körpermaße</h2><label class="f">Datum</label><input class="input" id="msD" type="date" value="${d}" max="${today()}">
-  <div class="grid2">${MEAS.map(([k, l]) => `<div><label class="f">${l}${k === 'bf' ? '' : ' (cm)'}</label><input class="input" data-mk="${k}" type="number" step="0.1" inputmode="decimal" value="${cur[k] ?? ''}" placeholder="${last[k] ?? ''}"></div>`).join('')}</div>
+  <div class="grid2">${MEAS.map(([k, l]) => `<div><label class="f">${l}${k === 'bf' ? '' : ' (cm)'}</label><input class="input" data-mk="${k}" type="text" inputmode="decimal" autocomplete="off" step="0.1" inputmode="decimal" value="${cur[k] ?? ''}" placeholder="${last[k] ?? ''}"></div>`).join('')}</div>
   <button class="btn block" id="msSave" style="margin-top:14px">Speichern</button>`, sh => {
     $('#msSave').onclick = () => { const o = {}; sh.querySelectorAll('[data-mk]').forEach(i => { const x = parseFloat(String(i.value).replace(',', '.')); if (x > 0) o[i.dataset.mk] = x; });
       if (!Object.keys(o).length) return toast('Bitte mindestens einen Wert eingeben'); S.measures[$('#msD').value] = o; save(); closeSheet(); render(); toast('Gespeichert'); };
@@ -363,10 +371,10 @@ drawChart = function () {
   const cv = $('#chart'); if (!cv) return; chartObj?.destroy();
   const end = today(), start = C.range ? addDays(end, -C.range + 1) : ([...Object.keys(S.measures), ...Object.keys(S.water), ...Object.keys(S.entries)].sort()[0] || addDays(end, -29));
   const days = []; for (let x = start; x <= end; x = addDays(x, 1)) days.push(x);
-  const txt = css('--mut'), grid = css('--line'), cols = ['#7c5cff', '#22d3a6', '#ffb547', '#ff6b8b', '#3ba7ff', '#c084fc', '#f97316'];
+  const txt = css('--mut'), grid = css('--line'), cols = ['#3b82f6', '#22d3a6', '#ffb547', '#ff6b8b', '#06b6d4', '#a3e635', '#f97316'];
   let datasets = [], info = '', y1 = false;
   if (C.metric === 'meas') { datasets = MEAS.map(([k, l], i) => ({ type: 'line', label: tr(l), data: days.map(d => S.measures[d]?.[k] ?? null), borderColor: cols[i], backgroundColor: cols[i], spanGaps: true, tension: .3, pointRadius: 3, yAxisID: k === 'bf' ? 'y1' : 'y', hidden: false })).filter(ds => ds.data.some(x => x != null)); y1 = datasets.some(d => d.yAxisID === 'y1'); info = tr('Körpermaße in cm, Körperfett rechts in %.'); }
-  if (C.metric === 'water') { datasets = [{ type: 'bar', label: tr('Wasser (L)'), data: days.map(d => S.water[d] ? S.water[d] / 1000 : null), backgroundColor: '#3ba7ffbb', borderRadius: 6 }, { type: 'line', label: tr('Ziel'), data: days.map(() => S.settings.waterGoal / 1000), borderColor: css('--f'), borderDash: [6, 5], pointRadius: 0 }]; }
+  if (C.metric === 'water') { datasets = [{ type: 'bar', label: tr('Wasser (L)'), data: days.map(d => S.water[d] ? S.water[d] / 1000 : null), backgroundColor: '#06b6d4bb', borderRadius: 6 }, { type: 'line', label: tr('Ziel'), data: days.map(() => S.settings.waterGoal / 1000), borderColor: css('--f'), borderDash: [6, 5], pointRadius: 0 }]; }
   if (C.metric === 'tdee') {
     const pts = days.map(d => daysBetween(d, end) % 3 ? null : estimateAt(d));
     datasets = [{ type: 'line', label: tr('Verbrauch (kcal)'), data: pts, borderColor: '#ffb547', backgroundColor: '#ffb54733', fill: true, spanGaps: true, tension: .35, pointRadius: 2 }, { type: 'line', label: tr('Ø Aufnahme 7T'), data: days.map(d => { const l = Array.from({ length: 7 }, (_, i) => addDays(d, -i)).filter(isLogged); return l.length ? Math.round(l.reduce((a, x) => a + dayTotals(x).kcal, 0) / l.length) : null; }), borderColor: css('--acc'), pointRadius: 0, tension: .35, spanGaps: true }];
@@ -390,11 +398,11 @@ const _renderProfile = renderProfile;
 renderProfile = function (v) {
   _renderProfile(v);
   v.querySelector('.card:nth-of-type(2)').insertAdjacentHTML('afterend', `<div class="card"><h3><span>${I('settings')}Einstellungen</span></h3>
-  <div class="grid2"><div><label class="f">Wasserziel (ml)</label><input class="input" id="sWG" type="number" step="100" value="${S.settings.waterGoal}"></div><div><label class="f">Glasgröße (ml)</label><input class="input" id="sGl" type="number" step="50" value="${S.settings.glass}"></div></div>
+  <div class="grid2"><div><label class="f">Wasserziel (ml)</label><input class="input" id="sWG" type="text" inputmode="decimal" autocomplete="off" step="100" value="${S.settings.waterGoal}"></div><div><label class="f">Glasgröße (ml)</label><input class="input" id="sGl" type="text" inputmode="decimal" autocomplete="off" step="50" value="${S.settings.glass}"></div></div>
   <label class="row" style="margin-top:12px"><input type="checkbox" id="sBeep" ${S.settings.beep ? 'checked' : ''}> <span>Ton beim Scannen</span></label>
   <label class="row" style="margin-top:8px"><input type="checkbox" id="sCont" ${S.settings.continuousScan ? 'checked' : ''}> <span>Serienscan (Produkte direkt hinzufügen, Kamera bleibt offen)</span></label>
   <button class="btn ghost block" id="sOnb" style="margin-top:12px">${I('compass')}Einrichtung erneut starten</button></div>`);
-  const sv = () => { S.settings.waterGoal = Math.max(500, +$('#sWG').value || 2500); S.settings.glass = Math.max(50, +$('#sGl').value || 250); S.settings.beep = $('#sBeep').checked; S.settings.continuousScan = $('#sCont').checked; save(); };
+  const sv = () => { S.settings.waterGoal = Math.min(10000, Math.max(500, num($('#sWG').value, 0, 1e4) || 2500)); S.settings.glass = Math.min(2000, Math.max(50, num($('#sGl').value, 0, 1e4) || 250)); S.settings.beep = $('#sBeep').checked; S.settings.continuousScan = $('#sCont').checked; save(); };
   v.querySelectorAll('#sWG,#sGl,#sBeep,#sCont').forEach(i => i.onchange = () => { sv(); toast('Gespeichert'); });
   $('#sOnb').onclick = () => onboarding(0, S.profile ? { ...S.profile } : null);
   // CSV um Wasser & Maße ergänzen
