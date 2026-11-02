@@ -1,156 +1,150 @@
 'use strict';
-/* FitScan i18n: UI wird auf Deutsch gerendert; bei Englisch übersetzt ein DOM-Observer Texte & Attribute. */
-const I18N_EN = {
-  'Tagebuch':'Diary','Lebensmittel':'Foods','Fortschritt':'Progress','Profil':'Profile','Profil & Daten':'Profile & data','Scannen':'Scan',
-  'Heute':'Today','Gestern':'Yesterday','kcal übrig':'kcal left','kcal drüber':'kcal over','Protein':'Protein','Kohlenhydrate':'Carbs','Fett':'Fat',
-  'Ballaststoffe':'Fiber','Zucker':'Sugar','Salz':'Salt','Frühstück':'Breakfast','Mittagessen':'Lunch','Abendessen':'Dinner','Snacks':'Snacks',
-  'Frühstück':'Breakfast','Mittagessen':'Lunch','Abendessen':'Dinner','Snacks':'Snacks','Mittag.':'Lunch','Abend.':'Dinner','Mittag.':'Lunch','Abend.':'Dinner',
-  'Hinzufügen':'Add','Wie gestern':'Same as yesterday','Gewicht':'Weight','Eintragen':'Log',
-  'Tägliches Wiegen (morgens, nüchtern) macht den Trend am genauesten.':'Weighing daily (mornings, before eating) makes the trend most accurate.',
-  'Tipp: Lege im Profil deine Ziele fest, um passende Kalorien- und Makroziele zu bekommen.':'Tip: set your goals in Profile to get matching calorie and macro targets.',
-  'Suche':'Search','Favoriten':'Favorites','Zuletzt':'Recent','Eigene':'Custom','Gerichte':'Recipes','Basis':'Basics','Gericht':'Recipe','Eigenes':'Custom',
-  'Lebensmittel, Marke oder Barcode suchen…':'Search food, brand or barcode…','Bibliothek & Eigene':'Library & custom','Open Food Facts':'Open Food Facts',
-  'Keine Produkte gefunden.':'No products found.','Schnell hinzufügen':'Quick add','Hinzufügen zu:':'Add to:',
-  'Suche in der Basis-Bibliothek, deinen eigenen Lebensmitteln und Millionen Produkten von Open Food Facts – oder scanne einen Barcode.':'Search the basic library, your own foods and millions of Open Food Facts products – or scan a barcode.',
-  'Noch keine Favoriten. Tippe beim Lebensmittel auf den Stern.':'No favorites yet. Tap the star on a food.','Hier erscheinen zuletzt eingetragene Lebensmittel.':'Recently logged foods appear here.',
-  'Eigenes Lebensmittel anlegen':'Create custom food','Lege Lebensmittel an, die es nirgends gibt.':'Create foods that aren’t listed anywhere.',
-  'Neues Gericht / Rezept':'New recipe','bearbeiten':'edit','Kombiniere mehrere Zutaten zu einem Gericht und trage später eine Portion mit einem Tipp ein.':'Combine several ingredients into a recipe and log a portion later with one tap.',
-  'Nährwerte':'Nutrition','pro 100 g':'per 100 g','Energie':'Energy','davon Zucker':'of which sugar','Kohlenh.':'Carbs','Gramm':'Grams','Stück':'Piece','Portion':'Serving',
-  'Zum Tagebuch hinzufügen':'Add to diary','Änderung speichern':'Save changes','Eintrag löschen':'Delete entry','Favorit':'Favorite',
-  'Daten: Open Food Facts (ODbL) – Angaben können unvollständig sein.':'Data: Open Food Facts (ODbL) – information may be incomplete.',
-  'Lebensmittel bearbeiten':'Edit food','Eigenes Lebensmittel':'Custom food','Name':'Name','Marke (optional)':'Brand (optional)','z. B. Omas Apfelkuchen':'e.g. Grandma’s apple pie',
-  'Nährwerte pro 100 g':'Nutrition per 100 g','Kalorien (kcal)':'Calories (kcal)','Protein (g)':'Protein (g)','Kohlenhydrate (g)':'Carbs (g)','Fett (g)':'Fat (g)','Zucker (g)':'Sugar (g)',
-  'Ballaststoffe (g)':'Fiber (g)','Salz (g)':'Salt (g)','Portionsgröße (g)':'Serving size (g)','Speichern':'Save','Löschen':'Delete',
-  'Gericht bearbeiten':'Edit recipe','Neues Gericht':'New recipe','z. B. Protein-Porridge':'e.g. protein porridge','Anzahl Portionen':'Number of servings','Noch keine Zutaten':'No ingredients yet',
-  'Zutat suchen (offline-Bibliothek & Eigene)…':'Search ingredient (offline library & custom)…','kcal/Port.':'kcal/serv.','KH':'Carbs','Gericht speichern':'Save recipe',
-  'Barcode in den Rahmen halten':'Hold the barcode inside the frame','Kamera wird gestartet…':'Starting camera…','Nummer eingeben':'Enter number','Foto':'Photo','Licht':'Torch',
-  'Foto wird gelesen…':'Reading photo…','Kein Barcode im Foto gefunden':'No barcode found in photo','QR-Code erkannt':'QR code detected','Dieser Code enthält keine Produktnummer.':'This code contains no product number.',
-  'Barcode eingeben':'Enter barcode','Die Ziffern unter dem Strichcode (EAN/UPC, 8–13 Stellen).':'The digits under the barcode (EAN/UPC, 8–13 digits).','Produkt suchen':'Find product',
-  'Produkt nicht gefunden':'Product not found','Lebensmittel anlegen':'Create food','Keine Verbindung':'No connection','Erneut versuchen':'Try again','Selbst anlegen':'Create it yourself',
-  'Gewicht eintragen':'Log weight','Datum':'Date','Hell/Dunkel':'Light/Dark','Sprache / Language':'Language / Sprache',
-  'Wiegen':'Weigh in','Aktuell':'Current','Trendgewicht':'Trend weight','Pro Woche':'Per week','Echter Energieverbrauch':'Real energy expenditure','adaptiv':'adaptive',
-  'Ziel an echten Verbrauch anpassen':'Adjust goal to real expenditure','Gewicht':'Weight','Kalorien':'Calories','Makros':'Macros','Wochenschnitt':'Weekly avg',
-  '7T':'7D','30T':'30D','90T':'90D','1J':'1Y','Alles':'All','Linie':'Line','Balken':'Bars','Keine Glättung':'No smoothing','Trend (EMA)':'Trend (EMA)','7-Tage-Mittel':'7-day average',
-  'Letzte Wiegungen':'Recent weigh-ins','Noch keine Einträge':'No entries yet','Waage':'Scale','Ziel':'Goal','Geglättet':'Smoothed','Protein (kcal)':'Protein (kcal)',
-  'Kohlenhydrate (kcal)':'Carbs (kcal)','Fett (kcal)':'Fat (kcal)','Ø kcal/Tag':'Avg kcal/day','Ø Trendgewicht (kg)':'Avg trend weight (kg)',
-  'Noch keine Gewichtsdaten in diesem Zeitraum.':'No weight data in this period yet.','Keine Einträge in diesem Zeitraum.':'No entries in this period.',
-  'Makros als Kalorienanteil pro Tag (Protein/KH × 4, Fett × 9).':'Macros as calories per day (protein/carbs × 4, fat × 9).',
-  'Wochendurchschnitt der Kalorien (Balken) und des Trendgewichts (Linie).':'Weekly average calories (bars) and trend weight (line).',
-  'Logge mindestens ~2 Wochen lang Essen und wiege dich regelmäßig. Dann berechnet FitScan deinen tatsächlichen Verbrauch aus Aufnahme und Trendgewicht – genauer als jede Formel.':'Log your food for at least ~2 weeks and weigh in regularly. FitScan then calculates your actual expenditure from intake and trend weight – more accurate than any formula.',
-  'Profil & Ziel':'Profile & goal','Männlich':'Male','Weiblich':'Female','Alter':'Age','Größe (cm)':'Height (cm)','Gewicht (kg)':'Weight (kg)','Aktivität':'Activity',
-  'Abnehmen':'Lose','Halten':'Maintain','Aufbauen':'Gain','Tempo:':'Rate:','Ziele berechnen & übernehmen':'Calculate & apply goals','Tagesziele (manuell)':'Daily targets (manual)',
-  'Ziele speichern':'Save targets','Daten':'Data','Backup (JSON)':'Backup (JSON)','Import':'Import','Tagebuch CSV':'Diary CSV','Gewicht CSV':'Weight CSV',
-  'Demo-Daten laden (6 Wochen)':'Load demo data (6 weeks)','Alle Daten löschen':'Delete all data',
-  'Alles bleibt auf diesem Gerät – kein Konto, keine Cloud, keine Paywall. Mach ab und zu ein Backup.':'Everything stays on this device – no account, no cloud, no paywall. Make a backup now and then.',
-  'Kaum aktiv (Bürojob, wenig Sport)':'Sedentary (desk job, little exercise)','Leicht aktiv (1–3× Sport/Woche)':'Lightly active (exercise 1–3×/week)','Mäßig aktiv (3–5× Sport/Woche)':'Moderately active (exercise 3–5×/week)',
-  'Sehr aktiv (6–7× Sport/Woche)':'Very active (exercise 6–7×/week)','Extrem aktiv (körperliche Arbeit + Sport)':'Extremely active (physical job + exercise)',
-  'FitScan · 100 % kostenlos · Unbegrenzt scannen ':'FitScan · 100% free · Unlimited scans ','Produktdaten von':'Product data from',
-  'Gespeichert':'Saved','Gelöscht':'Deleted','Bitte Menge eingeben':'Please enter an amount','Bitte Namen eingeben':'Please enter a name','Mindestens eine Zutat':'At least one ingredient',
-  'Gericht gespeichert':'Recipe saved','Gewicht gespeichert':'Weight saved','Bitte gültiges Gewicht':'Please enter a valid weight','Ziele übernommen':'Goals applied','Bitte Werte prüfen':'Please check the values',
-  'Backup importiert':'Backup imported','Ungültige Backup-Datei':'Invalid backup file','Demo-Daten geladen':'Demo data loaded','Alle Daten gelöscht':'All data deleted','Ungültiger Code':'Invalid code',
-  'Licht nicht unterstützt':'Torch not supported','Aus lokalem Speicher (offline verfügbar)':'From local storage (available offline)','Hinweis: Für dieses Produkt fehlen Nährwerte – bitte prüfen':'Note: nutrition data missing for this product – please check',
-  'Gestern nichts bei dieser Mahlzeit eingetragen':'Nothing logged for this meal yesterday','Speicher voll – bitte Backup exportieren':'Storage full – please export a backup',
-  'Backup importieren? Aktuelle Daten werden ersetzt.':'Import backup? Current data will be replaced.','Demo-Daten zu deinen Daten hinzufügen?':'Add demo data to your data?',
-  'Wirklich ALLE Daten löschen? Das kann nicht rückgängig gemacht werden.':'Really delete ALL data? This cannot be undone.','Unbenanntes Produkt':'Unnamed product',
-  'Kamera braucht HTTPS':'Camera needs HTTPS','Kamera nicht verfügbar':'Camera not available','Kein Kamerazugriff':'No camera access',
-  'Milchprodukte':'Dairy','Obst':'Fruit','Gemüse':'Vegetables','Getreide':'Grains','Beilagen':'Sides','Brot':'Bread','Käse':'Cheese','Fette':'Fats & oils','Eier':'Eggs','Fleisch':'Meat','Wurst':'Cold cuts',
-  'Fisch':'Fish','Hülsenfrüchte':'Legumes','Nüsse':'Nuts & seeds','Süßes':'Sweets','Supplemente':'Supplements','Getränke':'Drinks','Saucen':'Sauces','Trockenobst':'Dried fruit',
+/* FitScan i18n: German source strings are the keys; t() looks up English and fills {placeholders}. */
+const EN = {
+  // Navigation & common
+  'Tagebuch': 'Diary', 'Lebensmittel': 'Foods', 'Fortschritt': 'Progress', 'Profil': 'Profile', 'Scannen': 'Scan', 'Heute': 'Today', 'Gestern': 'Yesterday', 'Morgen': 'Tomorrow',
+  'Abbrechen': 'Cancel', 'Schließen': 'Close', 'Speichern': 'Save', 'Löschen': 'Delete', 'Hinzufügen': 'Add', 'Weiter': 'Next', 'Zurück': 'Back', 'Fertig': 'Done', 'Auswählen': 'Select',
+  'Rückgängig': 'Undo', 'Gespeichert': 'Saved', 'Gelöscht': 'Deleted', 'Details': 'Details', 'Datum': 'Date', 'Name': 'Name', 'Entfernen': 'Remove', 'Laden': 'Load', 'Importieren': 'Import',
+  'Vorherige Woche': 'Previous week', 'Nächste Woche': 'Next week', 'Mahlzeit': 'Meal', 'Menge': 'Amount', 'Einheit': 'Unit', 'Fällig': 'Due', 'Auto': 'Auto',
+  // Meals
+  'Frühstück': 'Breakfast', 'Mittagessen': 'Lunch', 'Abendessen': 'Dinner', 'Snacks': 'Snacks', 'Mittag': 'Lunch', 'Abend': 'Dinner',
+  // Nutrients
+  'Kalorien': 'Calories', 'Protein': 'Protein', 'Kohlenhydrate': 'Carbs', 'Fett': 'Fat', 'K': 'C', 'Ballaststoffe': 'Fiber', 'Zucker': 'Sugar', 'davon Zucker': 'of which sugar', 'Salz': 'Salt',
+  'Energie': 'Energy', 'Nährwerte': 'Nutrition', 'Nährwerte pro 100 g': 'Nutrition per 100 g', 'Mikronährstoffe': 'Micronutrients', 'Makros': 'Macros',
+  'Gesättigte Fettsäuren': 'Saturated fat', 'Natrium': 'Sodium', 'Cholesterin': 'Cholesterol', 'Kalium': 'Potassium', 'Calcium': 'Calcium', 'Magnesium': 'Magnesium', 'Eisen': 'Iron', 'Zink': 'Zinc',
+  'Vitamin A': 'Vitamin A', 'Vitamin C': 'Vitamin C', 'Vitamin D': 'Vitamin D', 'Vitamin E': 'Vitamin E', 'Vitamin B12': 'Vitamin B12', 'Vitamin B6': 'Vitamin B6', 'Folat': 'Folate', 'Koffein': 'Caffeine',
+  // Diary
+  'kcal übrig': 'kcal left', 'kcal drüber': 'kcal over', '{a} von {b} kcal': '{a} of {b} kcal', 'Tage in Folge geloggt': 'Days logged in a row',
+  'Ziele festlegen': 'Set your goals', 'Persönliche Kalorien- und Makroziele in einer Minute': 'Personal calorie and macro targets in a minute',
+  'Wöchentlicher Check-in': 'Weekly check-in', 'Ziele an deinen echten Verbrauch anpassen': 'Adjust targets to your real expenditure',
+  'Ganzen Tag von gestern kopieren': 'Copy all of yesterday', 'Wie gestern': 'Same as yesterday', 'Schnelleintrag': 'Quick add', 'Schnelleintrag bearbeiten': 'Edit quick add',
+  'Gewicht': 'Weight', 'Eintragen': 'Log', 'Zuletzt {w} kg': 'Last {w} kg', 'Morgens nüchtern wiegen': 'Weigh in the morning before eating',
+  '{n} Einträge kopiert': '{n} entries copied', 'Eintrag gelöscht': 'Entry deleted', 'Eintrag löschen': 'Delete entry',
+  'Wasser': 'Water', 'Glas': 'Glass', 'Wasserziel erreicht!': 'Water goal reached!',
+  'Intervallfasten': 'Intermittent fasting', 'Fastenziel': 'Fasting goal', 'Letztes Fasten: {h} h': 'Last fast: {h} h', 'Starte nach deiner letzten Mahlzeit.': 'Start after your last meal.',
+  'Starten': 'Start', 'Beenden': 'End', 'Ziel erreicht': 'Goal reached', 'Noch {h} h {m} min': '{h} h {m} min to go', 'seit {t}': 'since {t}',
+  'Fasten gestartet': 'Fast started', 'Fasten beendet · {h} h': 'Fast ended · {h} h',
+  'Nur Kalorien oder Makros – z. B. im Restaurant.': 'Just calories or macros – e.g. at a restaurant.', 'Nur Kalorien oder Makros': 'Just calories or macros', 'Bezeichnung': 'Label',
+  '≈ {k} kcal aus Makros': '≈ {k} kcal from macros', 'Bitte Kalorien oder Makros eingeben': 'Please enter calories or macros', '{k} kcal hinzugefügt': '{k} kcal added',
+  'Bitte gültiges Gewicht': 'Please enter a valid weight', 'Gewicht gespeichert': 'Weight saved',
+  'Berechnet aus {n} geloggten Tagen und deinem Trendgewicht der letzten {d} Tage.': 'Based on {n} logged days and your trend weight over the last {d} days.',
+  'Noch zu wenig Daten – Schätzung per Formel. Logge weiter Essen und Gewicht, dann wird es genauer.': 'Not enough data yet – formula estimate. Keep logging food and weight to make it more accurate.',
+  'Bisher': 'Current', 'Neu': 'New', 'Keine Änderung nötig': 'No change needed', '{d} kcal pro Tag': '{d} kcal per day', 'Verbrauch': 'Expenditure', 'Trend pro Woche': 'Trend per week',
+  'Neue Ziele übernehmen': 'Apply new targets', 'Ziele beibehalten': 'Keep targets', 'Letzte Check-ins': 'Recent check-ins', 'Ziele aktualisiert': 'Targets updated',
+  'Tagesdetails': 'Day details', 'Makroverteilung': 'Macro split', 'Anteil an Kalorien': 'Share of calories', '{a} von {b} Einträgen': '{a} of {b} entries',
+  'Nur aus Produkten mit Angaben von Open Food Facts.': 'Only from products with Open Food Facts data.',
+  'Keine Mikronährstoff-Daten für diesen Tag. Gescannte Produkte liefern oft Werte wie Natrium, Calcium oder Vitamine.': 'No micronutrient data for this day. Scanned products often provide values like sodium, calcium or vitamins.',
+  // Foods
+  'Zuletzt': 'Recent', 'Favoriten': 'Favorites', 'Scans': 'Scans', 'Eigene': 'Custom', 'Gerichte': 'Recipes', 'Basis': 'Basics', 'Eigenes': 'Custom', 'Gericht': 'Recipe',
+  'Hinzufügen zu': 'Add to', 'Lebensmittel oder Barcode': 'Food or barcode', 'Schnell hinzufügen': 'Quick add', 'Bibliothek & Eigene': 'Library & custom',
+  'Hier erscheinen zuletzt eingetragene Lebensmittel.': 'Recently logged foods appear here.', 'Noch keine Favoriten. Tippe beim Lebensmittel auf den Stern.': 'No favorites yet. Tap the star on a food.',
+  'Hier erscheinen deine gescannten Produkte – auch offline verfügbar.': 'Your scanned products appear here – available offline too.',
+  'Eigenes Lebensmittel anlegen': 'Create custom food', 'Mit Nährwerten von der Verpackung': 'With nutrition facts from the package', 'Neues Gericht': 'New recipe',
+  'Mehrere Zutaten zu einer Portion kombinieren': 'Combine ingredients into servings', 'Barcode {c} nachschlagen': 'Look up barcode {c}', 'Keine Produkte gefunden.': 'No products found.',
+  'Online-Suche gerade nicht erreichbar. Lokale Treffer funktionieren trotzdem.': 'Online search is unavailable right now. Local results still work.',
+  '{name} · {k} kcal zu {m}': '{name} · {k} kcal to {m}', '{n} ausgewählt': '{n} selected', 'Zu {m} hinzufügen': 'Add to {m}', '{n} Lebensmittel · {k} kcal hinzugefügt': '{n} foods · {k} kcal added',
+  'Gramm': 'Grams', 'Stück': 'Piece', 'Portion': 'Serving', 'Portionen': 'Servings', 'Wie zuletzt': 'Same as last time', 'Favorit': 'Favorite',
+  'Zu Favoriten hinzugefügt': 'Added to favorites', 'Aus Favoriten entfernt': 'Removed from favorites', 'Bitte Menge eingeben': 'Please enter an amount', 'Menge zu groß': 'Amount too large',
+  '{name} hinzugefügt': '{name} added', 'Gericht bearbeiten': 'Edit recipe', 'Lebensmittel bearbeiten': 'Edit food',
+  'Daten: Open Food Facts (ODbL) – Angaben können unvollständig sein.': 'Data: Open Food Facts (ODbL) – information may be incomplete.',
+  'Eigenes Lebensmittel': 'Custom food', 'Marke (optional)': 'Brand (optional)', 'z. B. Omas Apfelkuchen': 'e.g. Grandma’s apple pie', 'Bitte Namen eingeben': 'Please enter a name',
+  'Barcode {c} ist nicht bei Open Food Facts. Trage die Werte von der Verpackung ein – beim nächsten Scan wird das Produkt erkannt.': 'Barcode {c} is not on Open Food Facts. Enter the values from the package – the product will be recognized on the next scan.',
+  '„{n}“ löschen?': 'Delete “{n}”?', 'Bereits eingetragene Mahlzeiten bleiben erhalten.': 'Meals you already logged are kept.',
+  'z. B. Protein-Porridge': 'e.g. protein porridge', 'Zutaten': 'Ingredients', 'Noch keine Zutaten': 'No ingredients yet', 'Zutat suchen': 'Search ingredient', 'kcal/Portion': 'kcal/serving',
+  'Gericht speichern': 'Save recipe', 'Mindestens eine Zutat': 'At least one ingredient', 'Gericht gespeichert': 'Recipe saved', '{n} Zutaten · {k} kcal/Portion': '{n} ingredients · {k} kcal/serving',
+  // Scanner
+  'Serienscan an': 'Continuous scan on', 'Serienscan aus': 'Continuous scan off', 'Kamera wird gestartet…': 'Starting camera…', 'Kamera nicht verfügbar': 'Camera not available',
+  'Kamera braucht HTTPS': 'Camera needs HTTPS', 'Kein Kamerazugriff': 'No camera access', 'Barcode in den Rahmen halten': 'Hold the barcode inside the frame',
+  '{e} – nutze „Nummer eingeben“ oder „Foto“.': '{e} – use “Enter number” or “Photo”.', 'QR-Code erkannt': 'QR code detected', 'Dieser Code enthält keine Produktnummer.': 'This code contains no product number.',
+  'Suche {c}…': 'Looking up {c}…', '{c}: nicht gefunden': '{c}: not found', 'Hinzugefügt – nächsten Barcode scannen': 'Added – scan the next barcode', 'Keine Verbindung': 'No connection',
+  'Licht nicht unterstützt': 'Torch not supported', 'Foto wird gelesen…': 'Reading photo…', 'Kein Barcode im Foto gefunden': 'No barcode found in photo',
+  'Barcode eingeben': 'Enter barcode', 'Die Ziffern unter dem Strichcode (EAN/UPC, 8–13 Stellen).': 'The digits under the barcode (EAN/UPC, 8–13 digits).', 'Barcode': 'Barcode',
+  'Produkt suchen': 'Find product', 'Ungültiger Code': 'Invalid code', 'Produkt nicht gefunden': 'Product not found', 'Lebensmittel anlegen': 'Create food',
+  'Der Barcode {c} ist noch nicht bei Open Food Facts. Lege das Produkt selbst an – es wird lokal gespeichert und beim nächsten Scan erkannt.': 'Barcode {c} is not on Open Food Facts yet. Create the product yourself – it is saved locally and recognized on the next scan.',
+  'Hinweis: Für dieses Produkt fehlen Nährwerte – bitte prüfen': 'Note: nutrition data missing for this product – please check', 'Aus lokalem Speicher (offline verfügbar)': 'From local storage (available offline)',
+  'Open Food Facts ist gerade nicht erreichbar. Versuche es gleich nochmal oder lege das Produkt selbst an.': 'Open Food Facts is unreachable right now. Try again shortly or create the product yourself.',
+  'Erneut versuchen': 'Try again', 'Selbst anlegen': 'Create it yourself', 'Nummer eingeben': 'Enter number', 'Foto': 'Photo', 'Licht': 'Torch',
+  // Progress
+  'Wiegen': 'Weigh in', 'Zuletzt {d} · {k} kcal': 'Last {d} · {k} kcal',
+  'Passt dein Kalorienziel jede Woche an': 'Adjusts your calorie target every week', 'Trendgewicht': 'Trend weight', 'Waage': 'Scale', 'Pro Woche': 'Per week',
+  'Wochenschnitt': 'Weekly avg', 'Körpermaße': 'Body', '7T': '7D', '30T': '30D', '90T': '90D', '1J': '1Y', 'Alles': 'All',
+  'Diese Woche': 'This week', '{n} von 7 Tagen geloggt': '{n} of 7 days logged', 'Ø Kalorien': 'Avg calories', '{d} vs. Vorwoche': '{d} vs. last week', 'Ø Protein': 'Avg protein',
+  'Ziel {g} g': 'Goal {g} g', 'Im Zielbereich': 'On target', 'Tage ±10 % vom Kalorienziel': 'Days within ±10% of calorie goal', 'Proteinziel erreicht': 'Protein goal hit', 'Tage · Serie {s}': 'Days · streak {s}',
+  'Energieverbrauch': 'Energy expenditure', 'adaptiv': 'adaptive', 'Geschätzter Verbrauch (letzte {n} Tage)': 'Estimated expenditure (last {n} days)',
+  'Ø Aufnahme {i} kcal · Trend {c} kg · {n} Tage geloggt. Berechnet aus Aufnahme und Veränderung des Trendgewichts (7.700 kcal ≈ 1 kg).': 'Avg intake {i} kcal · trend {c} kg · {n} days logged. Calculated from intake and the change in trend weight (7,700 kcal ≈ 1 kg).',
+  'Logge etwa zwei Wochen lang Essen und wiege dich regelmäßig. Dann berechnet FitScan deinen tatsächlichen Verbrauch – genauer als jede Formel.': 'Log your food for about two weeks and weigh in regularly. FitScan then calculates your actual expenditure – more accurate than any formula.',
+  'Messen': 'Measure', 'Zuletzt {a} · Veränderung seit {b}': 'Last {a} · change since {b}', 'Taille, Hüfte, Brust & Co. zeigen Fortschritt, den die Waage nicht sieht.': 'Waist, hips, chest & co. show progress the scale can’t see.',
+  'Wiegungen': 'Weigh-ins', 'Trend': 'Trend', 'Noch keine Einträge': 'No entries yet', 'Linie': 'Line', 'Balken': 'Bars', '7-Tage-Mittel': '7-day average', 'Keine Glättung': 'No smoothing',
+  'Ziel': 'Goal', 'Min {a} · Max {b} kg · {n} Wiegungen': 'Min {a} · max {b} kg · {n} weigh-ins', 'Noch keine Gewichtsdaten in diesem Zeitraum.': 'No weight data in this period yet.',
+  'Geglättet': 'Smoothed', 'Ø {a} {u} an {n} geloggten Tagen': 'Avg {a} {u} on {n} logged days', 'Keine Einträge in diesem Zeitraum.': 'No entries in this period.',
+  'Kalorien aus Makros pro Tag (Protein und Kohlenhydrate × 4, Fett × 9).': 'Calories from macros per day (protein and carbs × 4, fat × 9).', 'KW {d}': 'Wk {d}', 'Ø kcal pro Tag': 'Avg kcal per day',
+  'Durchschnittliche Kalorien pro Woche im Vergleich zum Ziel.': 'Average calories per week compared to your goal.', 'Ø Aufnahme 7 Tage': 'Avg intake 7 days',
+  'Geschätzter Verbrauch aus Aufnahme und Trendgewicht (rollierend, 21–28 Tage).': 'Estimated expenditure from intake and trend weight (rolling, 21–28 days).',
+  'Wähle das Maß unten aus.': 'Pick a measurement below.', 'Noch keine Körpermaße erfasst.': 'No body measurements yet.', 'Leere Felder werden ignoriert.': 'Empty fields are ignored.',
+  'Bitte mindestens einen Wert eingeben': 'Please enter at least one value',
+  'Taille': 'Waist', 'Hüfte': 'Hips', 'Brust': 'Chest', 'Oberarm': 'Upper arm', 'Oberschenkel': 'Thigh', 'Hals': 'Neck', 'Körperfett': 'Body fat',
+  // Profile & settings
+  'Dein Tagesziel': 'Your daily target', '{r} kg pro Woche': '{r} kg per week', 'manuell angepasst': 'adjusted manually', 'Ziele': 'Goals', 'Profil & Ziel': 'Profile & goal',
+  'Noch nicht eingerichtet': 'Not set up yet', 'Tagesziele anpassen': 'Adjust daily targets', 'Kalorien und Makros manuell festlegen': 'Set calories and macros manually',
+  'Zuletzt {d}': 'Last {d}', 'Ziel an echten Verbrauch anpassen': 'Match your target to real expenditure', 'Wasser-Tracker': 'Water tracker', 'Wasserziel': 'Water goal', 'Glasgröße': 'Glass size',
+  'Fasten-Timer im Tagebuch anzeigen': 'Show the fasting timer in the diary', 'Scanner': 'Scanner', 'Ton beim Scannen': 'Beep on scan', 'Serienscan': 'Continuous scan',
+  'Produkte direkt hinzufügen, Kamera bleibt offen': 'Add products directly, camera stays open', 'Darstellung': 'Appearance', 'Design': 'Theme', 'Hell': 'Light', 'Dunkel': 'Dark', 'Sprache': 'Language',
+  'Daten': 'Data', 'Backup exportieren': 'Export backup', 'Alle Daten als JSON-Datei': 'All data as a JSON file', 'Backup importieren': 'Import backup', 'Ersetzt die aktuellen Daten': 'Replaces your current data',
+  'Tagebuch als CSV': 'Diary as CSV', 'Körperdaten als CSV': 'Body data as CSV', 'Gewicht, Wasser und Maße': 'Weight, water and measurements', 'Demo-Daten laden': 'Load demo data',
+  'Sechs Wochen Beispieldaten': 'Six weeks of sample data', 'Einrichtung erneut starten': 'Run setup again', 'Alle Daten löschen': 'Delete all data',
+  'Alles bleibt auf diesem Gerät – kein Konto, keine Cloud, keine Paywall.': 'Everything stays on this device – no account, no cloud, no paywall.',
+  '{p} Produkte offline · {b} Basis-Lebensmittel': '{p} products offline · {b} basic foods', 'Ungültige Backup-Datei': 'Invalid backup file', 'Backup importieren?': 'Import backup?',
+  'Deine aktuellen Daten werden durch das Backup ersetzt.': 'Your current data will be replaced by the backup.', 'Backup importiert': 'Backup imported', 'Demo-Daten laden?': 'Load demo data?',
+  'Die letzten sechs Wochen im Tagebuch werden mit Beispieldaten überschrieben.': 'The last six weeks of your diary will be overwritten with sample data.', 'Demo-Daten geladen': 'Demo data loaded',
+  'Alle Daten löschen?': 'Delete all data?', 'Tagebuch, Gewicht, eigene Lebensmittel und Einstellungen werden von diesem Gerät entfernt. Das kann nicht rückgängig gemacht werden.': 'Your diary, weight, custom foods and settings will be removed from this device. This cannot be undone.',
+  'Alle Daten gelöscht': 'All data deleted', 'Männlich': 'Male', 'Weiblich': 'Female', '{n} Jahre': '{n} years', 'Alter': 'Age', 'J.': 'yrs', 'Größe': 'Height', 'Aktivität': 'Activity', 'Tempo': 'Pace',
+  'Grundumsatz {b} kcal · Gesamtumsatz ≈ {t} kcal': 'BMR {b} kcal · TDEE ≈ {t} kcal', 'Ziele berechnen & übernehmen': 'Calculate & apply goals', 'Bitte Werte prüfen': 'Please check the values',
+  'Ziele übernommen': 'Goals applied', 'Tagesziele': 'Daily targets', 'Überschreibt die berechneten Ziele bis zum nächsten Check-in.': 'Overrides the calculated targets until the next check-in.',
+  'Makros ergeben {a} kcal (Ziel {b} kcal)': 'Macros add up to {a} kcal (goal {b} kcal)', 'Bitte mindestens 800 kcal': 'Please enter at least 800 kcal',
+  'Speicher voll – bitte Backup exportieren': 'Storage full – please export a backup',
+  'Abnehmen': 'Lose weight', 'Fett verlieren, Muskeln erhalten': 'Lose fat, keep muscle', 'Gewicht halten': 'Maintain weight', 'Gesund essen, Form halten': 'Eat well, stay in shape',
+  'Aufbauen': 'Build muscle', 'Muskeln und Gewicht zulegen': 'Gain muscle and weight',
+  'Kaum aktiv': 'Sedentary', 'Bürojob, wenig Sport': 'Desk job, little exercise', 'Leicht aktiv': 'Lightly active', '1–3× Sport pro Woche': 'Exercise 1–3× per week',
+  'Mäßig aktiv': 'Moderately active', '3–5× Sport pro Woche': 'Exercise 3–5× per week', 'Sehr aktiv': 'Very active', '6–7× Sport pro Woche': 'Exercise 6–7× per week',
+  'Extrem aktiv': 'Extremely active', 'Körperliche Arbeit und Sport': 'Physical job and exercise',
+  // Onboarding
+  'Kalorien und Makros tracken. Unbegrenzt scannen, ohne Konto – deine Daten bleiben auf deinem Gerät.': 'Track calories and macros. Unlimited scans, no account – your data stays on your device.',
+  "Los geht's": "Let's go", 'Überspringen': 'Skip', 'Was ist dein Ziel?': 'What is your goal?', 'Über dich': 'About you',
+  'Für die erste Schätzung deines Verbrauchs. Danach lernt FitScan aus deinen echten Daten.': 'For the first estimate of your expenditure. After that, FitScan learns from your real data.',
+  'Wie aktiv bist du?': 'How active are you?', 'Dein Plan': 'Your plan', 'pro Tag': 'per day', 'Plan übernehmen': 'Use this plan', 'Plan übernommen – viel Erfolg!': 'Plan saved – good luck!',
+  'Geschätzter Verbrauch ≈ {t} kcal. Der wöchentliche Check-in passt dein Ziel an deinen gemessenen Verbrauch an.': 'Estimated expenditure ≈ {t} kcal. The weekly check-in adjusts your target to your measured expenditure.',
+  // CSV
+  'Lebensmittel': 'Foods', 'Marke': 'Brand', 'Menge (g)': 'Amount (g)', 'Protein (g)': 'Protein (g)', 'Kohlenhydrate (g)': 'Carbs (g)', 'Fett (g)': 'Fat (g)', 'Zucker (g)': 'Sugar (g)',
+  'Ballaststoffe (g)': 'Fiber (g)', 'Salz (g)': 'Salt (g)', 'Gewicht (kg)': 'Weight (kg)', 'Trend (kg)': 'Trend (kg)', 'Wasser (ml)': 'Water (ml)',
+  // Food categories
+  'Milchprodukte': 'Dairy', 'Obst': 'Fruit', 'Gemüse': 'Vegetables', 'Getreide': 'Grains', 'Beilagen': 'Sides', 'Brot': 'Bread', 'Käse': 'Cheese', 'Fette': 'Fats & oils', 'Eier': 'Eggs',
+  'Fleisch': 'Meat', 'Wurst': 'Cold cuts', 'Fisch': 'Fish', 'Hülsenfrüchte': 'Legumes', 'Nüsse': 'Nuts & seeds', 'Süßes': 'Sweets', 'Supplemente': 'Supplements', 'Getränke': 'Drinks',
+  'Saucen': 'Sauces', 'Trockenobst': 'Dried fruit',
 };
-const I18N_RULES = [
-  [/^(.+) von (.+) kcal gegessen$/, '$1 of $2 kcal eaten'], [/^(.+) hinzugefügt$/, '$1 added'], [/^(\d+) Einträge kopiert$/, '$1 entries copied'],
-  [/^Suche (.+)…$/, 'Looking up $1…'], [/^Neues Ziel: (.+) kcal$/, 'New goal: $1 kcal'], [/^pro Portion \((.+)\)$/, 'per serving ($1)'],
-  [/^(.+) Zutaten · (.+) kcal\/Portion$/, '$1 ingredients · $2 kcal/serving'], [/^Portion: (.+)$/, 'Serving: $1'], [/^(.+) × Portion$/, '$1 × serving'],
-  [/^ · (.+) Gericht$/, ' · $1 recipe'], [/^(\d[\d.,]*) kg\/Woche$/, '$1 kg/week'],
-  [/^geschätzter TDEE \(letzte (\d+) Tage\)$/, 'estimated TDEE (last $1 days)'],
-  [/^Ø Aufnahme (.+) kcal · Trend (.+) kg · (\d+) Tage geloggt\. Berechnet aus deiner Aufnahme und der Veränderung des Trendgewichts \(7\.700 kcal ≈ 1 kg\)\.$/, 'Avg intake $1 kcal · trend $2 kg · $3 days logged. Calculated from your intake and the change in trend weight (7,700 kcal ≈ 1 kg).'],
-  [/^Trend (.+)$/, 'Trend $1'], [/^Min (.+) · Max (.+) kg · (\d+) Wiegungen$/, 'Min $1 · max $2 kg · $3 weigh-ins'],
-  [/^Ø (.+) (kcal|g) an (\d+) geloggten Tagen$/, 'Avg $1 $2 on $3 logged days'], [/^KW (.+)$/, 'Wk $1'],
-  [/^Grundumsatz (.+) kcal · Gesamtumsatz ≈ (.+) kcal$/, 'BMR $1 kcal · TDEE ≈ $2 kcal'], [/^→ Ziel $/, '→ Goal '], [/^ · P (.+) g · KH (.+) g · F (.+) g$/, ' · P $1 g · C $2 g · F $3 g'],
-  [/^Makros ergeben (.+) kcal \(Ziel (.+) kcal\)$/, 'Macros add up to $1 kcal (goal $2 kcal)'],
-  [/^ Produkte offline gespeichert · (\d+) Basis-Lebensmittel · Produktdaten von $/, ' products saved offline · $1 basic foods · product data from '],
-  [/^(\d+) Produkte offline gespeichert · (\d+) Basis-Lebensmittel · Produktdaten von $/, '$1 products saved offline · $2 basic foods · product data from '],
-  [/^Barcode (.+) wurde bei Open Food Facts nicht gefunden – trage die Werte von der Verpackung ein\. Beim nächsten Scan wird es automatisch erkannt\.$/, 'Barcode $1 was not found on Open Food Facts – enter the values from the package. It will be recognized automatically on the next scan.'],
-  [/^Der Barcode $/, 'Barcode '], [/^ ist \(noch\) nicht in Open Food Facts\. Du kannst es selbst anlegen – es wird lokal gespeichert und beim nächsten Scan erkannt\.$/, ' is not (yet) in Open Food Facts. You can create it yourself – it is saved locally and recognized on the next scan.'],
-  [/^Open Food Facts ist gerade nicht erreichbar \((.+)\)\. Versuche es gleich nochmal oder lege das Produkt selbst an\.$/, 'Open Food Facts is unreachable right now ($1). Try again shortly or create the product yourself.'],
-  [/^Online-Suche gerade nicht erreichbar \((.+)\)\. Lokale Treffer oben funktionieren trotzdem\.$/, 'Online search unavailable right now ($1). Local results above still work.'],
-  [/^(.+) – nutze „Nummer eingeben“ oder „Foto“\.$/, m => null], 
-  [/^ · (.+) kcal\/100 g$/, ' · $1 kcal/100 g'],
-];
 let LANG = 'de';
 const LOC = () => LANG === 'en' ? 'en-US' : 'de-DE';
-function tr(s) {
-  if (LANG !== 'en' || s == null) return s;
-  const raw = String(s), lead = raw.match(/^\s*/)[0], trail = raw.match(/\s*$/)[0], core = raw.trim();
-  if (!core) return raw;
-  if (I18N_EN[core] != null) return lead + I18N_EN[core] + trail;
-  const cam = core.match(/^(.+) – nutze „Nummer eingeben“ oder „Foto“\.$/); if (cam) return lead + tr(cam[1]) + ' – use “Enter number” or “Photo”.' + trail;
-  for (const [re, rep] of I18N_RULES) { if (typeof rep === 'string' && re.test(raw)) return raw.replace(re, rep); if (typeof rep === 'string' && re.test(core)) return lead + core.replace(re, rep) + trail; }
-  // Fallback: Kategorien & Portionseinheiten wortweise (Lebensmittelnamen werden nie übersetzt)
-  let out = raw.replace(/^(\s*)([A-Za-zÄÖÜäöüß]+)( · )/, (m, a, w, b) => w === 'Gerichte' ? a + 'Dishes' + b : I18N_EN[w] ? a + I18N_EN[w] + b : m);
-  out = out.replace(/\b(\d+(?:[.,]\d+)?) (Scheibe|Portion|Stück|Glas|Tasse|Dose|EL|TL|Handvoll|Becher|Riegel|Kugel|Flasche|Messlöffel|Packung|Schale|Teller|Stange|Zehe|Filet|Wurst|Würstchen|Brötchen|Ei|Eiweiß|Eigelb|Keks|Waffel|Stäbchen)\b( roh)?/g,
-    (m, n, u, r) => n + ' ' + ({Scheibe:'slice',Portion:'serving',Stück:'piece',Glas:'glass',Tasse:'cup',Dose:'can',EL:'tbsp',TL:'tsp',Handvoll:'handful',Becher:'tub',Riegel:'bar',Kugel:'scoop',Flasche:'bottle',Messlöffel:'scoop',Packung:'pack',Schale:'bowl',Teller:'plate',Stange:'stalk',Zehe:'clove',Filet:'fillet',Wurst:'sausage',Würstchen:'sausage',Brötchen:'roll',Ei:'egg',Eiweiß:'egg white',Eigelb:'egg yolk',Keks:'cookie',Waffel:'waffle',Stäbchen:'stick'})[u] + (r ? ' raw' : ''));
-  return out.replace(/\bca\. /g, 'approx. ').replace(/ · K (\d)/, ' · C $1');
+const I18N_MISSING = new Set();
+function t(s, vars) {
+  let r = s;
+  if (LANG === 'en' && s) { if (EN[s] != null) r = EN[s]; else I18N_MISSING.add(s); }
+  return vars ? String(r).replace(/\{(\w+)\}/g, (m, k) => vars[k] ?? m) : r;
 }
-const SKIP = el => el && el.closest && el.closest('.nm, .prodhead h2, script, style, [data-notr]');
-function trNode(n) {
-  if (n.nodeType === 3) { if (SKIP(n.parentElement)) return; if (n._de == null || (n.nodeValue !== n._en)) n._de = n.nodeValue; const v = tr(n._de); n._en = v; if (n.nodeValue !== v) n.nodeValue = v; return; }
-  if (n.nodeType !== 1 || SKIP(n)) return;
-  for (const a of ['placeholder', 'title', 'aria-label']) if (n.hasAttribute(a)) { const k = '_de_' + a; if (n[k] == null || n.getAttribute(a) !== n['_en_' + a]) n[k] = n.getAttribute(a); const v = tr(n[k]); n['_en_' + a] = v; if (n.getAttribute(a) !== v) n.setAttribute(a, v); }
-  for (const c of n.childNodes) trNode(c);
+// Food categories & serving labels (food names themselves are never translated)
+const UNITS_EN = { Scheibe: 'slice', Portion: 'serving', Stück: 'piece', Glas: 'glass', Tasse: 'cup', Dose: 'can', EL: 'tbsp', TL: 'tsp', Handvoll: 'handful', Becher: 'tub', Riegel: 'bar', Kugel: 'scoop', Flasche: 'bottle',
+  Messlöffel: 'scoop', Packung: 'pack', Schale: 'bowl', Teller: 'plate', Stange: 'stalk', Zehe: 'clove', Filet: 'fillet', Wurst: 'sausage', Würstchen: 'sausage', Brötchen: 'roll', Ei: 'egg', Eiweiß: 'egg white',
+  Eigelb: 'egg yolk', Keks: 'cookie', Waffel: 'waffle', Stäbchen: 'stick' };
+function tFood(s) {
+  if (!s) return '';
+  if (LANG !== 'en') return s;
+  if (s === 'Gerichte') return 'Dishes';
+  if (EN[s] != null) return EN[s];
+  return String(s).replace(/Portion: /g, 'Serving: ').replace(/× Portion\b/g, '× serving').replace(/^Portion$/, 'Serving')
+    .replace(/(\d+(?:[.,]\d+)?) (Scheibe|Portion|Stück|Glas|Tasse|Dose|EL|TL|Handvoll|Becher|Riegel|Kugel|Flasche|Messlöffel|Packung|Schale|Teller|Stange|Zehe|Filet|Würstchen|Wurst|Brötchen|Eiweiß|Eigelb|Ei|Keks|Waffel|Stäbchen)(?![a-zäöüß])( roh)?/g,
+      (m, n, u, raw) => `${n} ${UNITS_EN[u]}${raw ? ' raw' : ''}`)
+    .replace(/\bca\. /g, 'approx. ');
 }
-let i18nObs = null;
 function applyLang(lang) {
-  LANG = lang; document.documentElement.lang = lang;
-  trNode(document.body);
-  if (!i18nObs) { i18nObs = new MutationObserver(ms => { i18nObs.disconnect(); for (const m of ms) { if (m.type === 'characterData') trNode(m.target); else m.addedNodes.forEach(trNode); } observe(); }); }
-  const observe = () => i18nObs.observe(document.body, { childList: true, subtree: true, characterData: true });
-  i18nObs.disconnect(); observe();
+  LANG = lang === 'en' ? 'en' : 'de'; document.documentElement.lang = LANG;
+  document.querySelectorAll('[data-t]').forEach(el => el.textContent = t(el.dataset.t));
+  document.querySelectorAll('[data-tl]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.tl)); el.title = t(el.dataset.tl); });
 }
-// ---- v2 ----
-Object.assign(I18N_EN, {
-  'Weiter':'Next','Zurück':'Back','Überspringen':'Skip',"Los geht's":"Let's go",'Plan übernehmen':'Use this plan','Deutsch':'Deutsch','English':'English',
-  'Kostenloser Kalorien- & Makro-Tracker. Unbegrenzt scannen, keine Paywall, kein Konto – deine Daten bleiben auf deinem Gerät.':'Free calorie & macro tracker. Unlimited scans, no paywall, no account – your data stays on your device.',
-  'Was ist dein Ziel?':'What is your goal?','Fett verlieren, Muskeln erhalten':'Lose fat, keep muscle','Gewicht halten':'Maintain weight','Gesund essen, Form halten':'Eat healthy, stay in shape','Muskeln & Gewicht zulegen':'Build muscle & gain weight',
-  'Über dich':'About you','Für die Startschätzung deines Verbrauchs. FitScan lernt danach aus deinen echten Daten.':'For the initial estimate of your expenditure. FitScan then learns from your real data.',
-  'Wie aktiv bist du?':'How active are you?','Dein Plan':'Your plan','kcal pro Tag':'kcal per day','Plan übernommen – viel Erfolg! ':'Plan saved – good luck! ',
-  'Wöchentlicher Check-in':'Weekly check-in','Verbrauch':'Expenditure','Trend/Woche':'Trend/week','Bisher':'Current','Neu':'New','Keine Änderung nötig':'No change needed',
-  'Neue Ziele übernehmen':'Apply new targets','Ziele beibehalten':'Keep targets','Letzte Check-ins':'Recent check-ins','Ziele aktualisiert':'Targets updated','Lege zuerst dein Profil an':'Set up your profile first',
-  'Noch zu wenig Daten – Schätzung per Formel. Logge weiter Essen und Gewicht, dann wird es genauer.':'Not enough data yet – formula estimate. Keep logging food and weight to make it more accurate.',
-  'Wöchentlicher Check-in fällig':'Weekly check-in due','Ziele an deinen echten Verbrauch anpassen':'Adjust targets to your real expenditure','fällig':'due','Check-in starten':'Start check-in','Check-in ansehen':'View check-in',
-  'Noch kein Check-in. FitScan passt dein Kalorienziel jede Woche an deinen gemessenen Verbrauch an.':'No check-in yet. FitScan adjusts your calorie target weekly to your measured expenditure.',
-  'Schnelleintrag':'Quick add','Schnelleintrag':'Quick add','Nur Kalorien oder Makros eintragen – z. B. im Restaurant.':'Log just calories or macros – e.g. at a restaurant.','Bezeichnung (optional)':'Label (optional)',
-  'Hinzufügen':'Add','Bitte Kalorien oder Makros eingeben':'Please enter calories or macros','Scannen':'Scan',
-  'Logge heute, um die Serie zu halten':'Log today to keep your streak','Ganzen Tag von gestern kopieren':'Copy all of yesterday',
-  'Wasser':'Water','Glas':'Glass','Wasserziel erreicht!':'Water goal reached!','Intervallfasten':'Intermittent fasting','Ziel erreicht! ':'Goal reached! ',
-  'Fasten beenden':'End fast','Fasten starten':'Start fast','Fasten gestartet':'Fast started','Fasten beendet':'Fast ended','Starte dein Fastenfenster, wenn du die letzte Mahlzeit gegessen hast.':'Start your fasting window after your last meal.',
-  'Tagesdetails':'Day details','Nährwert':'Nutrient','Ziel':'Goal','Mikronährstoffe':'Micronutrients',
-  'Nur aus Produkten mit Angaben (Open Food Facts). Rechte Spalte: Einträge mit Daten.':'Only from products with data (Open Food Facts). Right column: entries with data.',
-  'Keine Mikronährstoff-Daten für diesen Tag. Gescannte Produkte liefern oft Werte wie Natrium, Calcium oder Vitamine.':'No micronutrient data for this day. Scanned products often provide values like sodium, calcium or vitamins.',
-  'Gesättigte Fettsäuren':'Saturated fat','Natrium':'Sodium','Cholesterin':'Cholesterol','Kalium':'Potassium','Calcium':'Calcium','Eisen':'Iron','Zink':'Zinc','Folat':'Folate','Koffein':'Caffeine',
-  'Scans':'Scans','Mehrfachauswahl':'Multi-select','Hier erscheinen deine gescannten Produkte – auch offline verfügbar.':'Your scanned products appear here – available offline too.',
-  'Hinzugefügt – nächsten Barcode scannen':'Added – scan the next barcode','Serienscan: an':'Continuous scan: on','Serienscan: aus':'Continuous scan: off',
-  'Diese Woche':'This week','letzte 7 Tage':'last 7 days','Ø Kalorien':'Avg calories','Ø Protein':'Avg protein','Im Zielbereich (±10 %)':'On target (±10%)','Proteinziel erreicht':'Protein goal hit','Tage':'days','Tag':'day',
-  'Körpermaße':'Body measurements','Messen':'Measure','Taille, Hüfte, Brust & Co. zeigen Fortschritt, den die Waage nicht sieht.':'Waist, hips, chest & co. show progress the scale can’t see.',
-  'Taille':'Waist','Hüfte':'Hips','Brust':'Chest','Oberarm':'Upper arm','Oberschenkel':'Thigh','Hals':'Neck','Körperfett %':'Body fat %','Taille (cm)':'Waist (cm)','Hüfte (cm)':'Hips (cm)','Brust (cm)':'Chest (cm)','Oberarm (cm)':'Upper arm (cm)','Oberschenkel (cm)':'Thigh (cm)','Hals (cm)':'Neck (cm)',
-  'Körpermaße':'Body','Wasser':'Water','Bitte mindestens einen Wert eingeben':'Please enter at least one value','Körpermaße in cm, Körperfett rechts in %.':'Body measurements in cm, body fat on the right in %.',
-  'Wasser (L)':'Water (L)','Verbrauch (kcal)':'Expenditure (kcal)','Ø Aufnahme 7T':'Avg intake 7D','Geschätzter Verbrauch aus Aufnahme und Trendgewicht (rollierend, 21–28 Tage).':'Estimated expenditure from intake and trend weight (rolling, 21–28 days).',
-  'Einstellungen':'Settings','Wasserziel (ml)':'Water goal (ml)','Glasgröße (ml)':'Glass size (ml)','Ton beim Scannen':'Beep on scan','Serienscan (Produkte direkt hinzufügen, Kamera bleibt offen)':'Continuous scan (add products directly, camera stays open)',
-  'Einrichtung erneut starten':'Run setup again','Gewicht CSV':'Body CSV',
-});
-I18N_RULES.unshift(
-  [/^Berechnet aus (\d+) geloggten Tagen und deinem Trendgewicht der letzten (\d+) Tage\.$/, 'Based on $1 logged days and your trend weight over the last $2 days.'],
-  [/^([+-][\d.,]+) kcal pro Tag · P (.+) g · KH (.+) g · F (.+) g$/, '$1 kcal per day · P $2 g · C $3 g · F $4 g'],
-  [/^Keine Änderung nötig · P (.+) g · KH (.+) g · F (.+) g$/, 'No change needed · P $1 g · C $2 g · F $3 g'],
-  [/^≈ (.+) kcal aus Makros$/, '≈ $1 kcal from macros'], [/^(\d+) Lebensmittel \((.+) kcal\) hinzugefügt$/, '$1 foods ($2 kcal) added'], [/^(\d+) ausgewählt$/, '$1 selected'],
-  [/^Seit (.+) · Ziel (\d+) h$/, 'Since $1 · goal $2 h'], [/^noch (\d+) h (\d+) min$/, '$1 h $2 min to go'], [/^Letztes Fasten: (.+) h$/, 'Last fast: $1 h'],
-  [/^Protein (\d+) %$/, 'Protein $1%'], [/^Kohlenhydrate (\d+) %$/, 'Carbs $1%'], [/^Fett (\d+) %$/, 'Fat $1%'], [/^Heute$/, 'Today'],
-  [/^Letzter Check-in: (.+) · Ziel (.+) kcal$/, 'Last check-in: $1 · goal $2 kcal'], [/^(▲|▼)? ?(.+) vs\. Vorwoche$/, '$1 $2 vs. last week'], [/^Ziel (\d+) g$/, 'Goal $1 g'],
-  [/^Serie: (\d+) Tage · (\d+)\/7 Tage geloggt$/, 'Streak: $1 days · $2/7 days logged'], [/^Zuletzt: (.+) · Veränderung seit (.+)$/, 'Last: $1 · change since $2'],
-  [/^Suche (\d+)…$/, 'Looking up $1…'], [/^(\d+): nicht gefunden$/, '$1: not found'], [/^− (\d+) ml$/, '− $1 ml'], [/^Vom (.+)$/, 'From $1']
-);
-const _trBase = tr;
-tr = function (s) {
-  if (LANG !== 'en' || s == null) return s;
-  const m = String(s).trim().match(/^(\d+) (Tag|Tage) in Folge$/); if (m) return `${m[1]}-day streak`;
-  return _trBase(s);
-};
