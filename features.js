@@ -74,7 +74,7 @@ function onboarding(step = 0, d = null) {
   let body = '';
   if (step === 0) body = `<div class="onb-hero"><img src="icons/icon-512.png" alt=""><h1>FitScan</h1><p class="mut">Kostenloser Kalorien- & Makro-Tracker. Unbegrenzt scannen, keine Paywall, kein Konto – deine Daten bleiben auf deinem Gerät.</p>
     <div class="seg" id="oLang" style="max-width:240px;margin:18px auto"><button data-v="de" class="${LANG === 'de' ? 'on' : ''}">Deutsch</button><button data-v="en" class="${LANG === 'en' ? 'on' : ''}">English</button></div></div>${nav(false, "Los geht's")}`;
-  if (step === 1) body = `<h2>Was ist dein Ziel?</h2><div class="opts">${[['lose', '📉', 'Abnehmen', 'Fett verlieren, Muskeln erhalten'], ['maintain', '⚖️', 'Gewicht halten', 'Gesund essen, Form halten'], ['gain', '💪', 'Aufbauen', 'Muskeln & Gewicht zulegen']]
+  if (step === 1) body = `<h2>Was ist dein Ziel?</h2><div class="opts">${[['lose', I('trendDown'), 'Abnehmen', 'Fett verlieren, Muskeln erhalten'], ['maintain', I('scale'), 'Gewicht halten', 'Gesund essen, Form halten'], ['gain', I('trendUp'), 'Aufbauen', 'Muskeln & Gewicht zulegen']]
     .map(o => `<button class="opt ${d.goal === o[0] ? 'on' : ''}" data-v="${o[0]}"><span class="oi">${o[1]}</span><span><b>${o[2]}</b><br><span class="small mut">${o[3]}</span></span></button>`).join('')}</div>${nav()}`;
   if (step === 2) body = `<h2>Über dich</h2><p class="small mut">Für die Startschätzung deines Verbrauchs. FitScan lernt danach aus deinen echten Daten.</p>
     <div class="seg" id="oSex"><button data-v="m" class="${d.sex === 'm' ? 'on' : ''}">Männlich</button><button data-v="f" class="${d.sex === 'f' ? 'on' : ''}">Weiblich</button></div>
@@ -101,7 +101,7 @@ function onboarding(step = 0, d = null) {
     S.profile = { sex: d.sex, age: d.age, height: d.height, weight: d.weight, activity: d.activity, goal: d.goal, rate: d.rate };
     const c = computeGoals(S.profile); S.goals = { kcal: c.kcal, p: c.p, c: c.c, f: c.f, manual: false };
     S.weights[today()] ??= d.weight; S.settings.onboarded = true; S.settings.planStart = today(); save();
-    el.classList.add('out'); setTimeout(() => el.remove(), 300); go('diary'); toast('Plan übernommen – viel Erfolg! 💪');
+    el.classList.add('out'); setTimeout(() => el.remove(), 300); go('diary'); toast('Plan übernommen – viel Erfolg!');
   };
 }
 
@@ -124,9 +124,9 @@ function checkinDue() {
 function checkinSheet() {
   const c = checkinData(); if (!c) return toast('Lege zuerst dein Profil an');
   const diff = c.kcal - c.old.kcal, sign = diff > 0 ? '+' : '';
-  openSheet(`<h2>📅 Wöchentlicher Check-in</h2><p class="small mut">${c.source === 'data' ? `Berechnet aus ${c.est.logged} geloggten Tagen und deinem Trendgewicht der letzten ${c.est.N} Tage.` : 'Noch zu wenig Daten – Schätzung per Formel. Logge weiter Essen und Gewicht, dann wird es genauer.'}</p>
+  openSheet(`<h2>${I('calendar')}Wöchentlicher Check-in</h2><p class="small mut">${c.source === 'data' ? `Berechnet aus ${c.est.logged} geloggten Tagen und deinem Trendgewicht der letzten ${c.est.N} Tage.` : 'Noch zu wenig Daten – Schätzung per Formel. Logge weiter Essen und Gewicht, dann wird es genauer.'}</p>
   <div class="grid2" style="margin:12px 0"><div class="pill"><span class="small mut">Verbrauch</span><b>${de(c.tdee)} kcal</b></div><div class="pill"><span class="small mut">Trend/Woche</span><b>${c.rate == null ? '–' : (c.rate > 0 ? '+' : '') + de(c.rate, 2) + ' kg'}</b></div></div>
-  <div class="card ci"><div class="row"><div class="grow"><div class="small mut">Bisher</div><b style="font-size:20px">${de(c.old.kcal)} kcal</b></div><div style="font-size:22px">→</div><div class="grow right"><div class="small mut">Neu</div><b style="font-size:24px;color:var(--acc)">${de(c.kcal)} kcal</b></div></div>
+  <div class="card ci"><div class="row"><div class="grow"><div class="small mut">Bisher</div><b style="font-size:20px">${de(c.old.kcal)} kcal</b></div><div class="mut">${I('arrowR')}</div><div class="grow right"><div class="small mut">Neu</div><b style="font-size:24px;color:var(--acc)">${de(c.kcal)} kcal</b></div></div>
   <div class="small mut" style="margin-top:6px">${diff === 0 ? 'Keine Änderung nötig' : `${sign}${de(diff)} kcal pro Tag`} · P ${c.macros.p} g · KH ${c.macros.c} g · F ${c.macros.f} g</div></div>
   <button class="btn block" id="ciOk">Neue Ziele übernehmen</button><button class="btn block ghost" id="ciKeep" style="margin-top:8px">Ziele beibehalten</button>
   ${S.checkins.length ? `<div class="small mut" style="margin-top:14px">Letzte Check-ins</div>${S.checkins.slice(-5).reverse().map(x => `<div class="entry"><div class="grow">${fmtDate(x.date)}</div><span class="small mut">${de(x.tdee)} kcal</span><b>${de(x.kcal)}</b></div>`).join('')}` : ''}`, () => {
@@ -139,11 +139,11 @@ function checkinSheet() {
 // ---------- Quick add ----------
 function quickAddSheet(meal) {
   meal ||= ui.targetMeal || mealDefault();
-  openSheet(`<h2>⚡ Schnelleintrag</h2><p class="small mut">Nur Kalorien oder Makros eintragen – z. B. im Restaurant.</p>
+  openSheet(`<h2>${I('zap')}Schnelleintrag</h2><p class="small mut">Nur Kalorien oder Makros eintragen – z. B. im Restaurant.</p>
   <label class="f">Bezeichnung (optional)</label><input class="input" id="qaN" placeholder="Schnelleintrag">
   <div class="grid2">${[['qaK', 'Kalorien (kcal)'], ['qaP', 'Protein (g)'], ['qaC', 'Kohlenhydrate (g)'], ['qaF', 'Fett (g)']].map(x => `<div><label class="f">${x[1]}</label><input class="input" id="${x[0]}" type="number" inputmode="decimal" step="any"></div>`).join('')}</div>
   <div class="small mut" id="qaHint" style="margin-top:6px"></div>
-  <div class="seg" id="qaM" style="margin-top:10px">${MEALS.map(m => `<button data-m="${m[0]}" class="${m[0] === meal ? 'on' : ''}">${m[2]} ${m[1].replace('essen', '.')}</button>`).join('')}</div>
+  <div class="seg" id="qaM" style="margin-top:10px">${MEALS.map(m => `<button data-m="${m[0]}" class="${m[0] === meal ? 'on' : ''}">${I(m[2])}${m[1].replace('essen', '.')}</button>`).join('')}</div>
   <button class="btn block" id="qaSave">Hinzufügen</button>`, sh => {
     const v = id => +String($('#' + id).value).replace(',', '.') || 0;
     const hint = () => { const k = v('qaP') * 4 + v('qaC') * 4 + v('qaF') * 9; $('#qaHint').textContent = k && !v('qaK') ? `≈ ${de(k)} kcal aus Makros` : ''; };
@@ -153,8 +153,8 @@ function quickAddSheet(meal) {
       const p = v('qaP'), c = v('qaC'), f = v('qaF'), kcal = v('qaK') || Math.round(p * 4 + c * 4 + f * 9);
       if (!kcal) return toast('Bitte Kalorien oder Makros eingeben');
       const name = $('#qaN').value.trim() || 'Schnelleintrag';
-      (S.entries[ui.date] ||= []).push({ id: uid(), meal, g: 100, label: '⚡', quick: true, food: { id: 'quick:' + uid(), name, cat: 'Eigene', src: 'quick', n: { kcal, p, c, f, fib: 0, sug: 0, salt: 0 } } });
-      save(); closeSheet(); go('diary'); toast(`✓ ${de(kcal)} kcal hinzugefügt`);
+      (S.entries[ui.date] ||= []).push({ id: uid(), meal, g: 100, label: 'Schnelleintrag', quick: true, food: { id: 'quick:' + uid(), name, cat: 'Eigene', src: 'quick', n: { kcal, p, c, f, fib: 0, sug: 0, salt: 0 } } });
+      save(); closeSheet(); go('diary'); toast(`${de(kcal)} kcal hinzugefügt`);
     };
   });
 }
@@ -165,30 +165,30 @@ renderDiary = function (v) {
   _renderDiary(v);
   const d = ui.date, st = streak();
   const nav = v.querySelector('.datenav');
-  if (nav && st > 0) nav.insertAdjacentHTML('afterend', `<div class="streak"><span>🔥 ${st} ${st === 1 ? 'Tag' : 'Tage'} in Folge</span>${(S.entries[d] || []).length ? '' : '<span class="mut small">Logge heute, um die Serie zu halten</span>'}</div>`);
-  if (d === today() && checkinDue()) v.querySelector('.datenav').insertAdjacentHTML('afterend', `<button class="card cta" id="ciBanner"><span style="font-size:26px">📅</span><span class="grow" style="text-align:left"><b>Wöchentlicher Check-in fällig</b><br><span class="small mut">Ziele an deinen echten Verbrauch anpassen</span></span><span>›</span></button>`);
+  if (nav && st > 0) nav.insertAdjacentHTML('afterend', `<div class="streak"><span>${I('flame')}${st} ${st === 1 ? 'Tag' : 'Tage'} in Folge</span>${(S.entries[d] || []).length ? '' : '<span class="mut small">Logge heute, um die Serie zu halten</span>'}</div>`);
+  if (d === today() && checkinDue()) v.querySelector('.datenav').insertAdjacentHTML('afterend', `<button class="card cta" id="ciBanner"><span class="cta-ic">${I('calendar')}</span><span class="grow" style="text-align:left"><b>Wöchentlicher Check-in fällig</b><br><span class="small mut">Ziele an deinen echten Verbrauch anpassen</span></span><span class="mut">${I('chevR')}</span></button>`);
   if ($('#ciBanner')) $('#ciBanner').onclick = checkinSheet;
   const sum = v.querySelector('.card .summary'); if (sum) { sum.parentElement.style.cursor = 'pointer'; sum.parentElement.onclick = () => dayDetailSheet(d); }
-  v.querySelectorAll('.addrow').forEach((row, i) => { const m = MEALS[i][0]; row.insertAdjacentHTML('beforeend', `<button class="btn ghost sm" data-quick="${m}" title="Schnelleintrag">⚡</button><button class="btn ghost sm" data-mscan="${m}" title="Scannen">▥</button>`); });
+  v.querySelectorAll('.addrow').forEach((row, i) => { const m = MEALS[i][0]; row.insertAdjacentHTML('beforeend', `<button class="btn ghost sm" data-quick="${m}" title="Schnelleintrag">${I('zap')}</button><button class="btn ghost sm" data-mscan="${m}" title="Scannen">${I('scan')}</button>`); });
   v.querySelectorAll('[data-quick]').forEach(b => b.onclick = () => quickAddSheet(b.dataset.quick));
   v.querySelectorAll('[data-mscan]').forEach(b => b.onclick = () => { ui.targetMeal = b.dataset.mscan; openScanner(); });
-  if (!(S.entries[d] || []).length && isLogged(addDays(d, -1))) v.querySelector('.card.meal')?.insertAdjacentHTML('beforebegin', `<button class="btn ghost block" id="copyDay" style="margin-bottom:12px">↺ Ganzen Tag von gestern kopieren</button>`);
+  if (!(S.entries[d] || []).length && isLogged(addDays(d, -1))) v.querySelector('.card.meal')?.insertAdjacentHTML('beforebegin', `<button class="btn ghost block" id="copyDay" style="margin-bottom:12px">${I('undo')}Ganzen Tag von gestern kopieren</button>`);
   if ($('#copyDay')) $('#copyDay').onclick = () => { const src = S.entries[addDays(d, -1)]; (S.entries[d] ||= []).push(...src.map(e => ({ ...e, id: uid() }))); save(); render(); toast(`${src.length} Einträge kopiert`); };
   // Wasser
   const ml = S.water[d] || 0, goal = S.settings.waterGoal, gl = S.settings.glass, n = Math.max(8, Math.ceil(goal / gl));
-  const wcard = `<div class="card"><h3><span>💧 Wasser</span><span class="kc mut small">${de(ml / 1000, 2)} / ${de(goal / 1000, 1)} L</span></h3>
+  const wcard = `<div class="card"><h3><span>${I('drop')}Wasser</span><span class="kc mut small">${de(ml / 1000, 2)} / ${de(goal / 1000, 1)} L</span></h3>
     <div class="glasses">${Array.from({ length: n }, (_, i) => `<button class="glass ${i < Math.round(ml / gl) ? 'on' : ''}" data-gi="${i}" aria-label="Glas"></button>`).join('')}</div>
-    <div class="row" style="margin-top:8px"><button class="btn ghost sm" id="wMinus">− ${gl} ml</button><div class="grow bar"><i style="width:${Math.min(100, ml / goal * 100)}%;background:#3ba7ff"></i></div><button class="btn sm" id="wPlus">＋ ${gl} ml</button></div></div>`;
+    <div class="row" style="margin-top:8px"><button class="btn ghost sm" id="wMinus">${I('minus')}${gl} ml</button><div class="grow bar"><i style="width:${Math.min(100, ml / goal * 100)}%;background:#3ba7ff"></i></div><button class="btn sm" id="wPlus">${I('plus')}${gl} ml</button></div></div>`;
   // Fasten
   const f = S.fast, tgt = S.settings.fastTarget;
   const el = f ? (Date.now() - f.start) / 36e5 : 0;
-  const fcard = `<div class="card"><h3><span>⏱️ Intervallfasten</span><select class="input" id="fTgt" style="width:auto;padding:6px 10px">${[12, 14, 16, 18, 20, 24].map(h => `<option value="${h}" ${h === tgt ? 'selected' : ''}>${h}:${24 - h > 0 ? 24 - h : 0}</option>`).join('')}</select></h3>
+  const fcard = `<div class="card"><h3><span>${I('timer')}Intervallfasten</span><select class="input" id="fTgt" style="width:auto;padding:6px 10px">${[12, 14, 16, 18, 20, 24].map(h => `<option value="${h}" ${h === tgt ? 'selected' : ''}>${h}:${24 - h > 0 ? 24 - h : 0}</option>`).join('')}</select></h3>
     ${f ? `<div class="row"><div class="ring" style="width:84px;height:84px">${ring(el, tgt, 84, 9, 'var(--acc2)')}<div class="center"><b id="fEl">${Math.floor(el)}:${String(Math.floor(el % 1 * 60)).padStart(2, '0')}</b></div></div>
-      <div class="grow"><div class="small mut">Seit ${new Date(f.start).toLocaleTimeString(LOC(), { hour: '2-digit', minute: '2-digit' })} · Ziel ${tgt} h</div><div><b>${el >= tgt ? 'Ziel erreicht! 🎉' : `noch ${Math.floor(tgt - el)} h ${Math.round((tgt - el) % 1 * 60)} min`}</b></div><button class="btn sm" id="fStop" style="margin-top:8px">Fasten beenden</button></div></div>`
+      <div class="grow"><div class="small mut">Seit ${new Date(f.start).toLocaleTimeString(LOC(), { hour: '2-digit', minute: '2-digit' })} · Ziel ${tgt} h</div><div><b>${el >= tgt ? 'Ziel erreicht!' : `noch ${Math.floor(tgt - el)} h ${Math.round((tgt - el) % 1 * 60)} min`}</b></div><button class="btn sm" id="fStop" style="margin-top:8px">Fasten beenden</button></div></div>`
       : `<div class="row"><div class="grow small mut">${S.fastLog.length ? `Letztes Fasten: ${de(S.fastLog.at(-1).h, 1)} h` : 'Starte dein Fastenfenster, wenn du die letzte Mahlzeit gegessen hast.'}</div><button class="btn sm" id="fStart">Fasten starten</button></div>`}</div>`;
   const wcardEl = v.querySelector('#dWeight')?.closest('.card');
   wcardEl?.insertAdjacentHTML('beforebegin', wcard); wcardEl?.insertAdjacentHTML('afterend', fcard);
-  const setW = x => { S.water[d] = Math.max(0, x); save(); render(); if (S.water[d] >= goal && x - gl < goal) toast('💧 Wasserziel erreicht!'); };
+  const setW = x => { S.water[d] = Math.max(0, x); save(); render(); if (S.water[d] >= goal && x - gl < goal) toast('Wasserziel erreicht!'); };
   $('#wPlus').onclick = () => setW(ml + gl); $('#wMinus').onclick = () => setW(ml - gl);
   v.querySelectorAll('[data-gi]').forEach(b => b.onclick = () => { const i = +b.dataset.gi; setW(i < Math.round(ml / gl) && i === Math.round(ml / gl) - 1 ? i * gl : (i + 1) * gl); });
   $('#fTgt').onchange = e => { S.settings.fastTarget = +e.target.value; save(); render(); };
@@ -222,7 +222,7 @@ foodSheet = function (food, opts = {}) {
   if (food.serving?.g) presets.push(['½', 'serv', 0.5], ['1×', 'serv', 1], ['2×', 'serv', 2]);
   presets.push(['50 g', 'g', 50], ['100 g', 'g', 100], ['150 g', 'g', 150], ['200 g', 'g', 200]);
   const last = !opts.entry && Object.values(S.entries).flat().reverse().find(e => e.food.id === food.id);
-  if (last) presets.unshift([`↺ ${last.label}`, last.unit || 'g', last.qty ?? last.g]);
+  if (last) presets.unshift([`${last.label}`, last.unit || 'g', last.qty ?? last.g]);
   qty.closest('.row').insertAdjacentHTML('afterend', `<div class="chips presets" style="margin:8px 0 0">${presets.map((p, i) => `<button class="chip" data-pi="${i}">${esc(p[0])}</button>`).join('')}</div>`);
   sh.querySelectorAll('[data-pi]').forEach(b => b.onclick = () => { const p = presets[+b.dataset.pi]; if ([...unit.options].some(o => o.value === p[1])) unit.value = p[1]; qty.value = p[2]; qty.dispatchEvent(new Event('input')); sh.querySelectorAll('[data-pi]').forEach(x => x.classList.toggle('on', x === b)); });
   if (food.micro) { const tbl = sh.querySelector('.ntable'); const sv = food.serving?.g;
@@ -235,9 +235,9 @@ const _renderLibrary = renderLibrary;
 renderLibrary = function (v) {
   _renderLibrary(v);
   const chips = v.querySelector('.chips');
-  chips.insertAdjacentHTML('beforeend', `<button class="chip ${ui.libTab === 'scans' ? 'on' : ''}" data-lt2="scans">▥ Scans</button>`);
+  chips.insertAdjacentHTML('beforeend', `<button class="chip ${ui.libTab === 'scans' ? 'on' : ''}" data-lt2="scans">${I('scan')}Scans</button>`);
   chips.querySelector('[data-lt2]').onclick = () => { ui.libTab = 'scans'; render(); };
-  v.querySelector('.search').insertAdjacentHTML('afterend', `<div class="row" style="margin:-2px 0 8px;gap:8px"><button class="btn ghost sm" id="lQuick">⚡ Schnelleintrag</button><button class="btn ghost sm ${multi ? 'onb2' : ''}" id="lMulti">☑ Mehrfachauswahl</button></div>`);
+  v.querySelector('.search').insertAdjacentHTML('afterend', `<div class="row" style="margin:-2px 0 8px;gap:8px"><button class="btn ghost sm" id="lQuick">${I('zap')}Schnelleintrag</button><button class="btn ghost sm ${multi ? 'onb2' : ''}" id="lMulti">${I('checksq')}Mehrfachauswahl</button></div>`);
   $('#lQuick').onclick = () => quickAddSheet(); $('#lMulti').onclick = () => { multi = !multi; picked.clear(); render(); };
 };
 const _fillLibList = fillLibList;
@@ -245,7 +245,7 @@ fillLibList = function () {
   if (ui.libTab === 'scans') {
     $('#lActions').innerHTML = ''; const list = S.scanHistory.map(h => S.products[h.code] || Object.values(S.foods).find(f => f.code === h.code)).filter(Boolean);
     const seen = new Set(), uniq = list.filter(f => !seen.has(f.id) && seen.add(f.id));
-    $('#lList').innerHTML = uniq.length ? uniq.map(foodRow).join('') : '<div class="empty"><div class="e">▥</div>Hier erscheinen deine gescannten Produkte – auch offline verfügbar.</div>';
+    $('#lList').innerHTML = uniq.length ? uniq.map(foodRow).join('') : '<div class="empty"><div class="e">' + I('scan') + '</div>Hier erscheinen deine gescannten Produkte – auch offline verfügbar.</div>';
     bindList(uniq); return decorateMulti();
   }
   _fillLibList(); decorateMulti();
@@ -259,7 +259,7 @@ function decorateMulti() {
   if (!multi) { $('#multiBar')?.remove(); return; }
   el.querySelectorAll('[data-fid]').forEach(r => {
     if (r.querySelector('.ck')) return; const id = r.dataset.fid;
-    r.insertAdjacentHTML('afterbegin', `<span class="ck ${picked.has(id) ? 'on' : ''}">✓</span>`);
+    r.insertAdjacentHTML('afterbegin', `<span class="ck ${picked.has(id) ? 'on' : ''}">${I('check')}</span>`);
     r.onclick = e => { e.preventDefault(); e.stopPropagation(); const f = (lastList || []).find(x => x.id === id); if (!f) return; if (picked.has(id)) picked.delete(id); else picked.set(id, f); r.querySelector('.ck').classList.toggle('on', picked.has(id)); multiBar(); };
     const qa = r.querySelector('[data-qa]'); if (qa) qa.style.display = 'none';
   });
@@ -270,7 +270,7 @@ function multiBar() {
   const meal = ui.targetMeal || mealDefault();
   bar.innerHTML = `<span class="grow">${picked.size} ausgewählt</span><select class="input" id="mbMeal" style="width:auto;padding:8px">${MEALS.map(m => `<option value="${m[0]}" ${m[0] === meal ? 'selected' : ''}>${m[1]}</option>`).join('')}</select><button class="btn" id="mbAdd" ${picked.size ? '' : 'disabled'}>Hinzufügen</button>`;
   $('#mbAdd').onclick = () => { const m = $('#mbMeal').value; let k = 0; for (const f of picked.values()) { const g = f.serving?.g || 100; addEntry(f, g, f.serving?.g ? `1 × ${f.serving.label}` : '100 g', m); k += nutr(f, g).kcal; }
-    toast(`✓ ${picked.size} Lebensmittel (${de(k)} kcal) hinzugefügt`); picked.clear(); multi = false; bar.remove(); ui.targetMeal = null; go('diary'); };
+    toast(`${picked.size} Lebensmittel (${de(k)} kcal) hinzugefügt`); picked.clear(); multi = false; bar.remove(); ui.targetMeal = null; go('diary'); };
 }
 const _go = go; go = function (tab, opts) { if (tab !== 'library') { multi = false; picked.clear(); $('#multiBar')?.remove(); } _go(tab, opts); };
 
@@ -294,7 +294,7 @@ async function serialAdd(code) {
     if (!p) { st.textContent = `${code}: nicht gefunden`; return; }
     const meal = ui.targetMeal || mealDefault(), g = p.serving?.g || 100;
     addEntry(p, g, p.serving?.g ? `1 × ${p.serving.label}` : '100 g', meal);
-    const tray = $('#scanTray'); tray.insertAdjacentHTML('afterbegin', `<div class="tray-item">✓ ${esc(p.name)} · ${de(nutr(p, g).kcal)} kcal</div>`);
+    const tray = $('#scanTray'); tray.insertAdjacentHTML('afterbegin', `<div class="tray-item">${I('check')}${esc(p.name)} · ${de(nutr(p, g).kcal)} kcal</div>`);
     st.textContent = 'Hinzugefügt – nächsten Barcode scannen';
   } catch (e) { st.textContent = 'Keine Verbindung'; }
 }
@@ -302,7 +302,7 @@ const _openScanner = openScanner;
 openScanner = async function () {
   if (!$('#scanTray')) $('#scanner').insertAdjacentHTML('beforeend', `<div id="scanTray" class="tray"></div><button class="chip scan-mode" id="scanMode"></button>`);
   $('#scanTray').innerHTML = '';
-  const upd = () => { $('#scanMode').textContent = S.settings.continuousScan ? '🔁 Serienscan: an' : '🔁 Serienscan: aus'; $('#scanMode').classList.toggle('on', S.settings.continuousScan); };
+  const upd = () => { $('#scanMode').innerHTML = I('repeat') + `<span>${tr(S.settings.continuousScan ? 'Serienscan: an' : 'Serienscan: aus')}</span>`; $('#scanMode').classList.toggle('on', S.settings.continuousScan); };
   $('#scanMode').onclick = () => { S.settings.continuousScan = !S.settings.continuousScan; save(); upd(); }; upd();
   await _openScanner();
   const t = scanStream?.getVideoTracks()[0], caps = t?.getCapabilities?.() || {};
@@ -326,20 +326,20 @@ renderProgress = function (v) {
   _renderProgress(v);
   const { cur, prev } = insights(), dk = cur.kcal - prev.kcal, due = checkinDue(), last = S.checkins.at(-1);
   const arrow = x => x > 0 ? '▲' : x < 0 ? '▼' : '';
-  const html = `<div class="card"><h3><span>📅 Wöchentlicher Check-in</span>${due ? '<span class="badge" style="background:var(--acc);color:#fff">fällig</span>' : ''}</h3>
+  const html = `<div class="card"><h3><span>${I('calendar')}Wöchentlicher Check-in</span>${due ? '<span class="badge" style="background:var(--acc);color:#fff">fällig</span>' : ''}</h3>
     <div class="small mut">${last ? `Letzter Check-in: ${fmtDate(last.date)} · Ziel ${de(last.kcal)} kcal` : 'Noch kein Check-in. FitScan passt dein Kalorienziel jede Woche an deinen gemessenen Verbrauch an.'}</div>
     <button class="btn block ${due ? '' : 'ghost'}" id="ciOpen" style="margin-top:10px">${due ? 'Check-in starten' : 'Check-in ansehen'}</button></div>
-  <div class="card"><h3><span>📊 Diese Woche</span><span class="small mut">letzte 7 Tage</span></h3>
+  <div class="card"><h3><span>${I('bars')}Diese Woche</span><span class="small mut">letzte 7 Tage</span></h3>
     <div class="grid2"><div class="pill"><span class="small mut">Ø Kalorien</span><b>${cur.n ? de(cur.kcal) : '–'}</b><span class="small ${dk > 0 ? '' : 'mut'}">${prev.n && cur.n ? `${arrow(dk)} ${de(Math.abs(dk))} vs. Vorwoche` : ''}</span></div>
     <div class="pill"><span class="small mut">Ø Protein</span><b>${cur.n ? r0(cur.p) + ' g' : '–'}</b><span class="small mut">Ziel ${S.goals.p} g</span></div>
     <div class="pill"><span class="small mut">Im Zielbereich (±10 %)</span><b>${cur.adh}/${cur.n || 0}</b><span class="small mut">Tage</span></div>
     <div class="pill"><span class="small mut">Proteinziel erreicht</span><b>${cur.ph}/${cur.n || 0}</b><span class="small mut">Tage</span></div></div>
-    <div class="small mut" style="margin-top:8px">🔥 Serie: ${streak()} Tage · ${cur.n}/7 Tage geloggt</div></div>`;
+    <div class="small mut" style="margin-top:8px">${I('flame')}Serie: ${streak()} Tage · ${cur.n}/7 Tage geloggt</div></div>`;
   v.querySelector('.card.tdee').insertAdjacentHTML('afterend', html);
   $('#ciOpen').onclick = checkinSheet;
   // Körpermaße
   const md = Object.keys(S.measures).sort(), lastM = md.length ? S.measures[md.at(-1)] : {}, firstM = md.length ? S.measures[md[0]] : {};
-  v.querySelector('.wlist').insertAdjacentHTML('beforebegin', `<div class="card"><h3><span>📏 Körpermaße</span><button class="btn sm" id="mAdd">＋ Messen</button></h3>
+  v.querySelector('.wlist').insertAdjacentHTML('beforebegin', `<div class="card"><h3><span>${I('ruler')}Körpermaße</span><button class="btn sm" id="mAdd">${I('plus')}Messen</button></h3>
     ${md.length ? `<div class="grid3">${MEAS.filter(m => lastM[m[0]] != null).map(([k, l]) => { const dlt = firstM[k] != null && md.length > 1 ? lastM[k] - firstM[k] : null; return `<div class="pill"><span class="small mut">${l}</span><b>${de(lastM[k], 1)}${k === 'bf' ? ' %' : ' cm'}</b><span class="small mut">${dlt == null ? '' : (dlt > 0 ? '+' : '') + de(dlt, 1)}</span></div>`; }).join('')}</div><div class="small mut" style="margin-top:6px">Zuletzt: ${fmtDate(md.at(-1))} · Veränderung seit ${fmtDate(md[0])}</div>`
     : '<div class="small mut">Taille, Hüfte, Brust & Co. zeigen Fortschritt, den die Waage nicht sieht.</div>'}</div>`);
   $('#mAdd').onclick = () => measureSheet();
@@ -350,7 +350,7 @@ renderProgress = function (v) {
 };
 function measureSheet(d = today()) {
   const cur = S.measures[d] || {}, last = S.measures[Object.keys(S.measures).sort().pop()] || {};
-  openSheet(`<h2>📏 Körpermaße</h2><label class="f">Datum</label><input class="input" id="msD" type="date" value="${d}" max="${today()}">
+  openSheet(`<h2>${I('ruler')}Körpermaße</h2><label class="f">Datum</label><input class="input" id="msD" type="date" value="${d}" max="${today()}">
   <div class="grid2">${MEAS.map(([k, l]) => `<div><label class="f">${l}${k === 'bf' ? '' : ' (cm)'}</label><input class="input" data-mk="${k}" type="number" step="0.1" inputmode="decimal" value="${cur[k] ?? ''}" placeholder="${last[k] ?? ''}"></div>`).join('')}</div>
   <button class="btn block" id="msSave" style="margin-top:14px">Speichern</button>`, sh => {
     $('#msSave').onclick = () => { const o = {}; sh.querySelectorAll('[data-mk]').forEach(i => { const x = parseFloat(String(i.value).replace(',', '.')); if (x > 0) o[i.dataset.mk] = x; });
@@ -389,11 +389,11 @@ function estimateAt(end) {
 const _renderProfile = renderProfile;
 renderProfile = function (v) {
   _renderProfile(v);
-  v.querySelector('.card:nth-of-type(2)').insertAdjacentHTML('afterend', `<div class="card"><h3>🔧 Einstellungen</h3>
+  v.querySelector('.card:nth-of-type(2)').insertAdjacentHTML('afterend', `<div class="card"><h3><span>${I('settings')}Einstellungen</span></h3>
   <div class="grid2"><div><label class="f">Wasserziel (ml)</label><input class="input" id="sWG" type="number" step="100" value="${S.settings.waterGoal}"></div><div><label class="f">Glasgröße (ml)</label><input class="input" id="sGl" type="number" step="50" value="${S.settings.glass}"></div></div>
   <label class="row" style="margin-top:12px"><input type="checkbox" id="sBeep" ${S.settings.beep ? 'checked' : ''}> <span>Ton beim Scannen</span></label>
   <label class="row" style="margin-top:8px"><input type="checkbox" id="sCont" ${S.settings.continuousScan ? 'checked' : ''}> <span>Serienscan (Produkte direkt hinzufügen, Kamera bleibt offen)</span></label>
-  <button class="btn ghost block" id="sOnb" style="margin-top:12px">🧭 Einrichtung erneut starten</button></div>`);
+  <button class="btn ghost block" id="sOnb" style="margin-top:12px">${I('compass')}Einrichtung erneut starten</button></div>`);
   const sv = () => { S.settings.waterGoal = Math.max(500, +$('#sWG').value || 2500); S.settings.glass = Math.max(50, +$('#sGl').value || 250); S.settings.beep = $('#sBeep').checked; S.settings.continuousScan = $('#sCont').checked; save(); };
   v.querySelectorAll('#sWG,#sGl,#sBeep,#sCont').forEach(i => i.onchange = () => { sv(); toast('Gespeichert'); });
   $('#sOnb').onclick = () => onboarding(0, S.profile ? { ...S.profile } : null);

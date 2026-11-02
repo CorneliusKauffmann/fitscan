@@ -1,6 +1,6 @@
 'use strict';
 /* FitScan – Free calorie & macro tracker – unlimited barcode scans, no paywall. Alle Daten bleiben lokal (localStorage). */
-const MEALS = [['breakfast','Frühstück','🌅'],['lunch','Mittagessen','🍽️'],['dinner','Abendessen','🌙'],['snacks','Snacks','🍎']];
+const MEALS = [['breakfast','Frühstück','sunrise'],['lunch','Mittagessen','sun'],['dinner','Abendessen','moon'],['snacks','Snacks','apple']];
 const KEY = 'fitscan.v1';
 try { if (!localStorage.getItem(KEY) && localStorage.getItem('naehrwerk.v1')) localStorage.setItem(KEY, localStorage.getItem('naehrwerk.v1')); } catch {}
 const $ = (s, el = document) => el.querySelector(s);
@@ -92,7 +92,8 @@ document.querySelectorAll('.tabbar button').forEach(b => b.onclick = () => b.dat
 function go(tab, opts = {}) { ui.tab = tab; Object.assign(ui, opts); document.querySelectorAll('.tabbar button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab)); window.scrollTo(0, 0); render(); }
 const TITLES = { diary: 'Tagebuch', library: 'Lebensmittel', progress: 'Fortschritt', profile: 'Profil & Daten' };
 function render() { $('#pageTitle').textContent = TITLES[ui.tab]; const v = $('#view'); ({ diary: renderDiary, library: renderLibrary, progress: renderProgress, profile: renderProfile })[ui.tab](v); }
-const foodIcon = f => f.img ? `<img class="thumb" src="${esc(f.img)}" loading="lazy" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'thumb',textContent:'🛒'}))">` : `<div class="thumb">${({Obst:'🍎',Trockenobst:'🍇',Gemüse:'🥦',Getreide:'🌾',Beilagen:'🍚',Brot:'🍞',Milchprodukte:'🥛',Käse:'🧀',Fette:'🫒',Eier:'🥚',Fleisch:'🍗',Wurst:'🥓',Fisch:'🐟',Hülsenfrüchte:'🫘',Nüsse:'🥜',Süßes:'🍫',Snacks:'🍿',Supplemente:'💪',Getränke:'🥤',Saucen:'🥫',Gerichte:'🍲',Gericht:'🥘',Eigene:'✏️'})[f.cat] || '🍴'}</div>`;
+const catHue = c => { let h = 0; for (const ch of String(c || '')) h = (h * 31 + ch.charCodeAt(0)) % 360; return h; };
+const foodIcon = f => f.img ? `<img class="thumb" src="${esc(f.img)}" loading="lazy" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'thumb',innerHTML:I('cart')}))">` : `<div class="thumb cat" data-notr style="--h:${catHue(f.cat)}">${f.cat === 'Eigene' ? I('pen') : f.cat === 'Gericht' || f.cat === 'Gerichte' ? I('utensils') : esc((f.cat || '·').slice(0, 2))}</div>`;
 
 // ---------- Diary ----------
 function ring(val, goal, size = 132, stroke = 12, color = 'var(--kcal)') {
@@ -104,19 +105,19 @@ function ring(val, goal, size = 132, stroke = 12, color = 'var(--kcal)') {
 function renderDiary(v) {
   const d = ui.date, t = dayTotals(d), g = S.goals, rest = g.kcal - t.kcal;
   const mb = (k, lbl, col) => `<div class="mrow"><div class="lbl"><span>${lbl}</span><span><b>${r0(t[k])}</b> / ${g[k]} g</span></div><div class="bar"><i style="width:${Math.min(100, t[k] / g[k] * 100)}%;background:${t[k] > g[k] * 1.05 ? 'var(--danger)' : col}"></i></div></div>`;
-  let html = `<div class="datenav"><button id="dPrev">‹</button><div class="d" id="dLabel">${d === today() ? 'Heute' : d === addDays(today(), -1) ? 'Gestern' : fmtDate(d)}<div class="small mut">${fmtDate(d)}</div></div><button id="dNext">›</button></div>
+  let html = `<div class="datenav"><button id="dPrev">${I('chevL')}</button><div class="d" id="dLabel">${d === today() ? 'Heute' : d === addDays(today(), -1) ? 'Gestern' : fmtDate(d)}<div class="small mut">${fmtDate(d)}</div></div><button id="dNext">${I('chevR')}</button></div>
   <div class="card"><div class="summary"><div class="ring">${ring(t.kcal, g.kcal)}<div class="center"><span class="big">${de(Math.abs(rest))}</span><span class="small mut">${rest >= 0 ? 'kcal übrig' : 'kcal drüber'}</span></div></div>
   <div class="macros"><div class="small mut">${de(t.kcal)} von ${de(g.kcal)} kcal gegessen</div>${mb('p', 'Protein', 'var(--p)')}${mb('c', 'Kohlenhydrate', 'var(--c)')}${mb('f', 'Fett', 'var(--f)')}</div></div>
   <div class="row small mut" style="margin-top:10px;justify-content:space-around"><span>Ballaststoffe <b>${r0(t.fib)} g</b></span><span>Zucker <b>${r0(t.sug)} g</b></span><span>Salz <b>${r1(t.salt)} g</b></span></div></div>`;
   for (const [id, name, ico] of MEALS) {
     const es = (S.entries[d] || []).filter(e => e.meal === id), kc = es.reduce((a, e) => a + nutr(e.food, e.g).kcal, 0);
-    html += `<div class="card meal"><h3><span>${ico} ${name}</span><span class="kc">${de(kc)} kcal</span></h3>`;
+    html += `<div class="card meal"><h3><span>${I(ico)}${name}</span><span class="kc">${de(kc)} kcal</span></h3>`;
     for (const e of es) { const n = nutr(e.food, e.g);
       html += `<div class="entry" data-eid="${e.id}">${foodIcon(e.food)}<div class="grow"><div class="nm">${esc(e.food.name)}</div><div class="small mut">${esc(e.label || r0(e.g) + ' g')} · P ${r0(n.p)} · K ${r0(n.c)} · F ${r0(n.f)}</div></div><div class="kcal">${de(n.kcal)}</div></div>`; }
-    html += `<div class="addrow"><button class="btn ghost sm" data-add="${id}">＋ Hinzufügen</button>${!es.length ? `<button class="btn ghost sm" data-copy="${id}">↺ Wie gestern</button>` : ''}</div></div>`;
+    html += `<div class="addrow"><button class="btn ghost sm" data-add="${id}">${I('plus')}Hinzufügen</button>${!es.length ? `<button class="btn ghost sm" data-copy="${id}">${I('undo')}Wie gestern</button>` : ''}</div></div>`;
   }
   const w = S.weights[d];
-  html += `<div class="card"><h3><span>⚖️ Gewicht</span><button class="btn sm" id="dWeight">${w ? de(w, 1) + ' kg' : 'Eintragen'}</button></h3><div class="small mut">${S.profile ? 'Tägliches Wiegen (morgens, nüchtern) macht den Trend am genauesten.' : 'Tipp: Lege im Profil deine Ziele fest, um passende Kalorien- und Makroziele zu bekommen.'}</div></div>`;
+  html += `<div class="card"><h3><span>${I('scale')}Gewicht</span><button class="btn sm" id="dWeight">${w ? de(w, 1) + ' kg' : 'Eintragen'}</button></h3><div class="small mut">${S.profile ? 'Tägliches Wiegen (morgens, nüchtern) macht den Trend am genauesten.' : 'Tipp: Lege im Profil deine Ziele fest, um passende Kalorien- und Makroziele zu bekommen.'}</div></div>`;
   v.innerHTML = html;
   $('#dPrev').onclick = () => { ui.date = addDays(d, -1); render(); };
   $('#dNext').onclick = () => { ui.date = addDays(d, 1); render(); };
@@ -153,11 +154,11 @@ function foodSheet(food, { entry = null } = {}) {
   const n100 = food.n;
   openSheet(`<div class="prodhead">${food.img ? `<img src="${esc(food.img)}" alt="" onerror="this.style.display='none'">` : foodIcon(food).replace('thumb', 'thumb" style="width:64px;height:64px;font-size:32px')}
     <div class="grow"><h2>${esc(food.name)}</h2><div class="mut small">${esc(food.brand || food.cat || '')}${food.code ? ' · ' + esc(food.code) : ''}</div></div>
-    <button class="star" id="fsFav" title="Favorit">${fav ? '★' : '☆'}</button></div>
+    <button class="star" id="fsFav" title="Favorit">${I('star', fav ? 'fill' : '')}</button></div>
   <div class="grid4" id="fsLive"></div>
   <div class="row" style="margin-top:12px"><input class="input" id="fsQty" type="number" inputmode="decimal" min="0" step="any" value="${qty}" style="max-width:110px">
     <select class="input" id="fsUnit">${units.map(u => `<option value="${u[0]}" ${u[0] === unit ? 'selected' : ''}>${esc(u[1])}${u[0] !== 'g' && u[0] !== 'ml' ? ' (' + de(u[2]) + ' g)' : ''}</option>`).join('')}</select></div>
-  <div class="seg" id="fsMeal" style="margin-top:10px">${MEALS.map(m => `<button data-m="${m[0]}" class="${m[0] === meal ? 'on' : ''}">${m[2]} ${m[1].replace('essen', '.')}</button>`).join('')}</div>
+  <div class="seg" id="fsMeal" style="margin-top:10px">${MEALS.map(m => `<button data-m="${m[0]}" class="${m[0] === meal ? 'on' : ''}">${I(m[2])}${m[1].replace('essen', '.')}</button>`).join('')}</div>
   <button class="btn block" id="fsSave">${entry ? 'Änderung speichern' : 'Zum Tagebuch hinzufügen'}</button>
   ${entry ? '<button class="btn block ghost" id="fsDel" style="margin-top:8px;color:var(--danger)">Eintrag löschen</button>' : ''}
   <table class="ntable" style="margin-top:14px"><tr><th>Nährwerte</th><th>pro 100 g</th>${sv ? `<th>pro Portion (${de(food.serving.g)} g)</th>` : ''}</tr>
@@ -169,14 +170,14 @@ function foodSheet(food, { entry = null } = {}) {
     $('#fsQty').oninput = live; $('#fsUnit').onchange = () => { const u = $('#fsUnit').value; $('#fsQty').value = u === 'g' || u === 'ml' ? r0(food.serving?.g || 100) : 1; live(); };
     live();
     sh.querySelectorAll('#fsMeal button').forEach(b => b.onclick = () => { meal = b.dataset.m; sh.querySelectorAll('#fsMeal button').forEach(x => x.classList.toggle('on', x === b)); });
-    $('#fsFav').onclick = () => { if (S.favorites[food.id]) delete S.favorites[food.id]; else S.favorites[food.id] = { ...food }; save(); $('#fsFav').textContent = S.favorites[food.id] ? '★' : '☆'; };
+    $('#fsFav').onclick = () => { if (S.favorites[food.id]) delete S.favorites[food.id]; else S.favorites[food.id] = { ...food }; save(); $('#fsFav').innerHTML = I('star', S.favorites[food.id] ? 'fill' : ''); };
     $('#fsSave').onclick = () => {
       const g = grams(); if (!(g > 0)) return toast('Bitte Menge eingeben');
       const u = units.find(x => x[0] === $('#fsUnit').value), q = +$('#fsQty').value;
       const label = u[0] === 'g' ? `${de(q)} g` : u[0] === 'ml' ? `${de(q)} ml` : `${de(q, q % 1 ? 1 : 0)} × ${u[1]}`;
       if (entry) Object.assign(entry, { g, label, meal, unit: u[0], qty: q });
       else { addEntry(food, g, label, meal); const e = S.entries[ui.date].at(-1); e.unit = u[0]; e.qty = q; }
-      save(); closeSheet(); toast(entry ? 'Gespeichert' : `✓ ${food.name} hinzugefügt`); if (!entry) { ui.targetMeal = null; go('diary'); } else render();
+      save(); closeSheet(); toast(entry ? 'Gespeichert' : `${food.name} hinzugefügt`); if (!entry) { ui.targetMeal = null; go('diary'); } else render();
     };
     if (entry) $('#fsDel').onclick = () => { S.entries[ui.date] = S.entries[ui.date].filter(x => x.id !== entry.id); save(); closeSheet(); render(); toast('Gelöscht'); };
   });
@@ -231,13 +232,13 @@ function localSearch(q) {
 function foodRow(f) {
   const s = f.serving?.g ? ` · ${esc(f.serving.label)}` : '';
   return `<div class="food" data-fid="${esc(f.id)}">${foodIcon(f)}<div class="grow"><div class="nm">${esc(f.name)}${f.src === 'recipe' ? '<span class="badge">Gericht</span>' : f.src === 'custom' ? '<span class="badge">Eigenes</span>' : ''}</div>
-  <div class="small mut">${esc(f.brand || f.cat || '')}${f.brand || f.cat ? ' · ' : ''}${de(f.n.kcal)} kcal/100 g${s}</div></div><button class="qa" data-qa="${esc(f.id)}" title="Schnell hinzufügen">＋</button></div>`;
+  <div class="small mut">${esc(f.brand || f.cat || '')}${f.brand || f.cat ? ' · ' : ''}${de(f.n.kcal)} kcal/100 g${s}</div></div><button class="qa" data-qa="${esc(f.id)}" title="Schnell hinzufügen">${I('plus')}</button></div>`;
 }
 let searchCtl = null, searchTimer = null, lastList = [];
 function renderLibrary(v) {
-  const tabs = [['search', 'Suche'], ['fav', '★ Favoriten'], ['recent', 'Zuletzt'], ['custom', 'Eigene'], ['recipes', 'Gerichte'], ['base', 'Basis']];
+  const tabs = [['search', 'Suche'], ['fav', 'Favoriten'], ['recent', 'Zuletzt'], ['custom', 'Eigene'], ['recipes', 'Gerichte'], ['base', 'Basis']];
   v.innerHTML = `${ui.targetMeal ? `<div class="small mut" style="margin-bottom:6px">Hinzufügen zu: <b>${MEALS.find(m => m[0] === ui.targetMeal)[1]}</b> · ${fmtDate(ui.date)}</div>` : ''}
-  <div class="search"><input class="input" id="lq" type="search" placeholder="Lebensmittel, Marke oder Barcode suchen…" value="${esc(ui.query)}" autocomplete="off"><button class="btn" id="lScan" title="Scannen">▥</button></div>
+  <div class="search"><input class="input" id="lq" type="search" placeholder="Lebensmittel, Marke oder Barcode suchen…" value="${esc(ui.query)}" autocomplete="off"><button class="btn" id="lScan" title="Scannen">${I('scan')}</button></div>
   <div class="chips">${tabs.map(t => `<button class="chip ${ui.libTab === t[0] ? 'on' : ''}" data-lt="${t[0]}">${t[1]}</button>`).join('')}</div>
   <div id="lActions"></div><div class="card" style="padding:4px 12px" id="lList"></div>`;
   v.querySelectorAll('[data-lt]').forEach(b => b.onclick = () => { ui.libTab = b.dataset.lt; render(); });
@@ -251,20 +252,20 @@ function bindList(list) {
   lastList = list; const el = $('#lList');
   el.querySelectorAll('[data-fid]').forEach(r => r.onclick = e => { if (e.target.closest('[data-qa]')) return; const f = list.find(x => x.id === r.dataset.fid); f && foodSheet(f); });
   el.querySelectorAll('[data-qa]').forEach(b => b.onclick = () => { const f = list.find(x => x.id === b.dataset.qa); const g = f.serving?.g || 100;
-    addEntry(f, g, f.serving?.g ? `1 × ${f.serving.label}` : '100 g', ui.targetMeal || mealDefault()); toast(`✓ ${f.name} (${de(nutr(f, g).kcal)} kcal)`); });
+    addEntry(f, g, f.serving?.g ? `1 × ${f.serving.label}` : '100 g', ui.targetMeal || mealDefault()); toast(`${f.name} (${de(nutr(f, g).kcal)} kcal)`); });
 }
 function fillLibList() {
   const el = $('#lList'), act = $('#lActions'); act.innerHTML = '';
   const show = (list, empty) => { el.innerHTML = list.length ? list.map(foodRow).join('') : `<div class="empty"><div class="e">${empty[0]}</div>${empty[1]}</div>`; bindList(list); };
   switch (ui.libTab) {
-    case 'search': if (ui.query.trim()) return doSearch(true); return show(S.recents.slice(0, 15), ['🔎', 'Suche in der Basis-Bibliothek, deinen eigenen Lebensmitteln und Millionen Produkten von Open Food Facts – oder scanne einen Barcode.']);
-    case 'fav': return show(Object.values(S.favorites), ['⭐', 'Noch keine Favoriten. Tippe beim Lebensmittel auf ☆.']);
-    case 'recent': return show(S.recents, ['🕒', 'Hier erscheinen zuletzt eingetragene Lebensmittel.']);
-    case 'custom': act.innerHTML = '<button class="btn block" id="newFood" style="margin-bottom:10px">＋ Eigenes Lebensmittel anlegen</button>'; $('#newFood').onclick = () => customFoodSheet(); 
-      show(Object.values(S.foods), ['✏️', 'Lege Lebensmittel an, die es nirgends gibt.']);
+    case 'search': if (ui.query.trim()) return doSearch(true); return show(S.recents.slice(0, 15), [I('search'), 'Suche in der Basis-Bibliothek, deinen eigenen Lebensmitteln und Millionen Produkten von Open Food Facts – oder scanne einen Barcode.']);
+    case 'fav': return show(Object.values(S.favorites), [I('star'), 'Noch keine Favoriten. Tippe beim Lebensmittel auf den Stern.']);
+    case 'recent': return show(S.recents, [I('clock'), 'Hier erscheinen zuletzt eingetragene Lebensmittel.']);
+    case 'custom': act.innerHTML = '<button class="btn block" id="newFood" style="margin-bottom:10px">' + I('plus') + 'Eigenes Lebensmittel anlegen</button>'; $('#newFood').onclick = () => customFoodSheet(); 
+      show(Object.values(S.foods), [I('pen'), 'Lege Lebensmittel an, die es nirgends gibt.']);
       el.querySelectorAll('[data-fid]').forEach(r => r.oncontextmenu = e => { e.preventDefault(); customFoodSheet(S.foods[r.dataset.fid]); }); return;
-    case 'recipes': act.innerHTML = '<button class="btn block" id="newRec" style="margin-bottom:10px">＋ Neues Gericht / Rezept</button>'; $('#newRec').onclick = () => recipeSheet();
-      el.innerHTML = Object.values(S.recipes).length ? Object.values(S.recipes).map(r => { const f = recipeFood(r); return foodRow(f).replace('</div><button', ` · <a href="#" data-edit="${r.id}">bearbeiten</a></div><button`); }).join('') : '<div class="empty"><div class="e">🥘</div>Kombiniere mehrere Zutaten zu einem Gericht und trage später eine Portion mit einem Tipp ein.</div>';
+    case 'recipes': act.innerHTML = '<button class="btn block" id="newRec" style="margin-bottom:10px">' + I('plus') + 'Neues Gericht / Rezept</button>'; $('#newRec').onclick = () => recipeSheet();
+      el.innerHTML = Object.values(S.recipes).length ? Object.values(S.recipes).map(r => { const f = recipeFood(r); return foodRow(f).replace('</div><button', ` · <a href="#" data-edit="${r.id}">bearbeiten</a></div><button`); }).join('') : '<div class="empty"><div class="e">' + I('utensils') + '</div>Kombiniere mehrere Zutaten zu einem Gericht und trage später eine Portion mit einem Tipp ein.</div>';
       bindList(Object.values(S.recipes).map(recipeFood)); el.querySelectorAll('[data-edit]').forEach(a => a.onclick = e => { e.preventDefault(); e.stopPropagation(); recipeSheet(S.recipes[a.dataset.edit]); }); return;
     case 'base': return show(BASE_FOODS.slice().sort((a, b) => a.cat.localeCompare(b.cat) || a.name.localeCompare(b.name)), ['', '']);
   }
@@ -322,7 +323,7 @@ function recipeSheet(r = null) {
     openSheet(`<h2>${r ? 'Gericht bearbeiten' : 'Neues Gericht'}</h2>
     <label class="f">Name</label><input class="input" id="rName" value="${esc(rec.name)}" placeholder="z. B. Protein-Porridge">
     <label class="f">Anzahl Portionen</label><input class="input" id="rPort" type="number" min="1" step="any" value="${rec.portions}">
-    <div class="card" style="margin-top:12px;padding:6px 12px">${rec.items.map((it, i) => `<div class="entry"><div class="grow"><div class="nm">${esc(it.food.name)}</div><div class="small mut">${de(nutr(it.food, it.g).kcal)} kcal</div></div><input class="input" data-ig="${i}" type="number" value="${it.g}" style="width:84px;padding:8px"> g<button class="icon-btn" data-ir="${i}">✕</button></div>`).join('') || '<div class="empty small">Noch keine Zutaten</div>'}</div>
+    <div class="card" style="margin-top:12px;padding:6px 12px">${rec.items.map((it, i) => `<div class="entry"><div class="grow"><div class="nm">${esc(it.food.name)}</div><div class="small mut">${de(nutr(it.food, it.g).kcal)} kcal</div></div><input class="input" data-ig="${i}" type="number" value="${it.g}" style="width:84px;padding:8px"> g<button class="icon-btn" data-ir="${i}">${I('x')}</button></div>`).join('') || '<div class="empty small">Noch keine Zutaten</div>'}</div>
     <div class="search"><input class="input" id="rq" placeholder="Zutat suchen (offline-Bibliothek & Eigene)…"></div><div id="rRes"></div>
     ${rec.items.length ? `<div class="grid4" style="margin:10px 0">${[['kcal', 'kcal/Port.'], ['p', 'Protein'], ['c', 'KH'], ['f', 'Fett']].map(([k, l]) => `<div class="pill"><b>${de(nutr(f, f.serving.g)[k])}</b><span class="small mut">${l}</span></div>`).join('')}</div>` : ''}
     <button class="btn block" id="rSave">Gericht speichern</button>${r ? '<button class="btn block ghost" id="rDel" style="margin-top:8px;color:var(--danger)">Löschen</button>' : ''}`, () => {
@@ -330,7 +331,7 @@ function recipeSheet(r = null) {
       document.querySelectorAll('[data-ig]').forEach(i => i.onchange = () => { rec.items[+i.dataset.ig].g = +i.value || 0; draw(); });
       document.querySelectorAll('[data-ir]').forEach(b => b.onclick = () => { rec.items.splice(+b.dataset.ir, 1); draw(); });
       $('#rq').oninput = e => { const res = e.target.value.trim() ? localSearch(e.target.value).slice(0, 8) : [];
-        $('#rRes').innerHTML = res.map(x => `<div class="food" data-add="${esc(x.id)}"><div class="grow"><div class="nm">${esc(x.name)}</div><div class="small mut">${de(x.n.kcal)} kcal/100 g</div></div><span class="qa" style="display:flex;align-items:center;justify-content:center">＋</span></div>`).join('');
+        $('#rRes').innerHTML = res.map(x => `<div class="food" data-add="${esc(x.id)}"><div class="grow"><div class="nm">${esc(x.name)}</div><div class="small mut">${de(x.n.kcal)} kcal/100 g</div></div><span class="qa" style="display:flex;align-items:center;justify-content:center">${I('plus')}</span></div>`).join('');
         $('#rRes').querySelectorAll('[data-add]').forEach(el => el.onclick = () => { const x = res.find(y => y.id === el.dataset.add); rec.items.push({ g: x.serving?.g || 100, food: { id: x.id, name: x.name, n: x.n } }); draw(); }); };
       $('#rSave').onclick = () => { if (!rec.name.trim()) return toast('Bitte Namen eingeben'); if (!rec.items.length) return toast('Mindestens eine Zutat'); S.recipes[rec.id] = rec; save(); closeSheet(); ui.libTab = 'recipes'; render(); toast('Gericht gespeichert'); };
       if (r) $('#rDel').onclick = () => { delete S.recipes[rec.id]; save(); closeSheet(); render(); };
@@ -389,7 +390,7 @@ async function handleBarcode(code) {
     const custom = Object.values(S.foods).find(f => f.code === code);
     if (custom) return foodSheet(custom);
     const { product, cached } = await lookupBarcode(code);
-    if (!product) return openSheet(`<h2>Produkt nicht gefunden</h2><p class="mut">Der Barcode <b>${esc(code)}</b> ist (noch) nicht in Open Food Facts. Du kannst es selbst anlegen – es wird lokal gespeichert und beim nächsten Scan erkannt.</p><button class="btn block" id="nfAdd">＋ Lebensmittel anlegen</button>`, () => $('#nfAdd').onclick = () => customFoodSheet(null, code));
+    if (!product) return openSheet(`<h2>Produkt nicht gefunden</h2><p class="mut">Der Barcode <b>${esc(code)}</b> ist (noch) nicht in Open Food Facts. Du kannst es selbst anlegen – es wird lokal gespeichert und beim nächsten Scan erkannt.</p><button class="btn block" id="nfAdd">${I('plus')}Lebensmittel anlegen</button>`, () => $('#nfAdd').onclick = () => customFoodSheet(null, code));
     if (!product.hasNutr) toast('Hinweis: Für dieses Produkt fehlen Nährwerte – bitte prüfen');
     foodSheet(product); if (cached) toast('Aus lokalem Speicher (offline verfügbar)');
   } catch (e) {
@@ -402,7 +403,7 @@ function weightSheet(d = today()) {
   const cur = S.weights[d], last = S.weights[Object.keys(S.weights).sort().filter(x => x <= d).pop()] || S.profile?.weight || 75;
   openSheet(`<h2>Gewicht eintragen</h2><div class="small mut">${fmtDate(d)}</div>
   <label class="f">Datum</label><input class="input" id="wDate" type="date" value="${d}" max="${today()}">
-  <div class="row" style="margin-top:12px;justify-content:center"><button class="icon-btn" id="wM">−</button><input class="input" id="wVal" type="number" step="0.1" inputmode="decimal" value="${cur ?? r1(last)}" style="max-width:140px;text-align:center;font-size:26px;font-weight:800"><span class="mut">kg</span><button class="icon-btn" id="wP">＋</button></div>
+  <div class="row" style="margin-top:12px;justify-content:center"><button class="icon-btn" id="wM">${I('minus')}</button><input class="input" id="wVal" type="number" step="0.1" inputmode="decimal" value="${cur ?? r1(last)}" style="max-width:140px;text-align:center;font-size:26px;font-weight:800"><span class="mut">kg</span><button class="icon-btn" id="wP">${I('plus')}</button></div>
   <button class="btn block" id="wSave" style="margin-top:14px">Speichern</button>${cur ? '<button class="btn block ghost" id="wDel" style="margin-top:8px;color:var(--danger)">Eintrag löschen</button>' : ''}`, () => {
     const vi = $('#wVal'); $('#wM').onclick = () => vi.value = r1(+vi.value - 0.1); $('#wP').onclick = () => vi.value = r1(+vi.value + 0.1);
     $('#wSave').onclick = () => { const w = +String(vi.value).replace(',', '.'); if (!(w > 20 && w < 400)) return toast('Bitte gültiges Gewicht'); S.weights[$('#wDate').value] = r1(w); if (S.profile) S.profile.weight = r1(w); save(); closeSheet(); render(); toast('Gewicht gespeichert'); };
@@ -416,11 +417,11 @@ const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).
 function renderProgress(v) {
   const ws = weightSeries(), last = ws.at(-1), rate = weeklyRate(ws), est = estimateTDEE(), C = ui.chart;
   const lastW = Object.keys(S.weights).sort().pop();
-  v.innerHTML = `<div class="card"><h3><span>⚖️ Gewicht</span><button class="btn sm" id="pW">＋ Wiegen</button></h3>
+  v.innerHTML = `<div class="card"><h3><span>${I('scale')}Gewicht</span><button class="btn sm" id="pW">${I('plus')}Wiegen</button></h3>
     <div class="grid3"><div class="stat"><span class="small mut">Aktuell</span><b>${lastW ? de(S.weights[lastW], 1) : '–'}</b><span class="small mut">kg</span></div>
     <div class="stat"><span class="small mut">Trendgewicht</span><b style="color:var(--acc)">${last?.t ? de(last.t, 1) : '–'}</b><span class="small mut">kg</span></div>
     <div class="stat"><span class="small mut">Pro Woche</span><b style="color:${rate == null ? 'inherit' : rate < 0 ? 'var(--acc2)' : 'var(--c)'}">${rate == null ? '–' : (rate > 0 ? '+' : '') + de(rate, 2)}</b><span class="small mut">kg</span></div></div></div>
-  <div class="card tdee"><h3><span>🔥 Echter Energieverbrauch</span><span class="small mut">adaptiv</span></h3>${est ? `<div class="row"><div class="stat grow"><b style="font-size:30px">${de(est.tdee)} kcal</b><span class="small mut">geschätzter TDEE (letzte ${est.N} Tage)</span></div></div>
+  <div class="card tdee"><h3><span>${I('flame')}Echter Energieverbrauch</span><span class="small mut">adaptiv</span></h3>${est ? `<div class="row"><div class="stat grow"><b style="font-size:30px">${de(est.tdee)} kcal</b><span class="small mut">geschätzter TDEE (letzte ${est.N} Tage)</span></div></div>
     <div class="small mut" style="margin-top:6px">Ø Aufnahme ${de(est.avgIn)} kcal · Trend ${est.change > 0 ? '+' : ''}${de(est.change, 2)} kg · ${est.logged} Tage geloggt. Berechnet aus deiner Aufnahme und der Veränderung des Trendgewichts (7.700 kcal ≈ 1 kg).</div>
     ${S.profile ? `<button class="btn sm ghost" id="pApply" style="margin-top:10px">Ziel an echten Verbrauch anpassen</button>` : ''}` : `<div class="small mut">Logge mindestens ~2 Wochen lang Essen und wiege dich regelmäßig. Dann berechnet FitScan deinen tatsächlichen Verbrauch aus Aufnahme und Trendgewicht – genauer als jede Formel.</div>`}</div>
   <div class="card"><div class="chips">${[['weight', 'Gewicht'], ['kcal', 'Kalorien'], ['macros', 'Makros'], ['protein', 'Protein'], ['weekly', 'Wochenschnitt']].map(m => `<button class="chip ${C.metric === m[0] ? 'on' : ''}" data-cm="${m[0]}">${m[1]}</button>`).join('')}</div>
@@ -496,23 +497,23 @@ function drawChart() {
 // ---------- Profile & data ----------
 function renderProfile(v) {
   const p = S.profile || { sex: 'm', age: 30, height: 180, weight: 80, activity: 1.375, goal: 'lose', rate: 0.5 }, g = S.goals, calc = computeGoals(p);
-  v.innerHTML = `<div class="card"><h3>🎯 Profil & Ziel</h3>
+  v.innerHTML = `<div class="card"><h3><span>${I('target')}Profil & Ziel</span></h3>
   <div class="seg" id="pSex"><button data-v="m" class="${p.sex === 'm' ? 'on' : ''}">Männlich</button><button data-v="f" class="${p.sex === 'f' ? 'on' : ''}">Weiblich</button></div>
   <div class="grid3"><div><label class="f">Alter</label><input class="input" id="pAge" type="number" value="${p.age}"></div><div><label class="f">Größe (cm)</label><input class="input" id="pH" type="number" value="${p.height}"></div><div><label class="f">Gewicht (kg)</label><input class="input" id="pWt" type="number" step="0.1" value="${p.weight}"></div></div>
   <label class="f">Aktivität</label><select class="input" id="pAct">${ACT.map(a => `<option value="${a[0]}" ${+p.activity === a[0] ? 'selected' : ''}>${a[1]}</option>`).join('')}</select>
   <label class="f">Ziel</label><div class="seg" id="pGoal">${[['lose', 'Abnehmen'], ['maintain', 'Halten'], ['gain', 'Aufbauen']].map(x => `<button data-v="${x[0]}" class="${p.goal === x[0] ? 'on' : ''}">${x[1]}</button>`).join('')}</div>
   <div id="pRateBox" class="${p.goal === 'maintain' ? 'hidden' : ''}"><label class="f">Tempo: <b id="pRateL">${de(p.rate, 2)} kg/Woche</b></label><input id="pRate" type="range" min="0.1" max="1" step="0.05" value="${p.rate}" style="width:100%;accent-color:var(--acc)"></div>
   <div class="small mut" id="pCalc" style="margin:8px 0"></div><button class="btn block" id="pSave">Ziele berechnen & übernehmen</button></div>
-  <div class="card"><h3>✍️ Tagesziele (manuell)</h3><div class="grid2">
+  <div class="card"><h3><span>${I('pen')}Tagesziele (manuell)</span></h3><div class="grid2">
   ${[['gK', 'Kalorien (kcal)', g.kcal], ['gP', 'Protein (g)', g.p], ['gC', 'Kohlenhydrate (g)', g.c], ['gF', 'Fett (g)', g.f]].map(x => `<div><label class="f">${x[1]}</label><input class="input" id="${x[0]}" type="number" value="${x[2]}"></div>`).join('')}</div>
   <div class="small mut" id="gSum" style="margin-top:6px"></div><button class="btn block ghost" id="gSave" style="margin-top:10px">Ziele speichern</button></div>
-  <div class="card"><h3>💾 Daten</h3><div class="small mut" style="margin-bottom:10px">Alles bleibt auf diesem Gerät – kein Konto, keine Cloud, keine Paywall. Mach ab und zu ein Backup.</div>
-  <div class="grid2"><button class="btn ghost" id="exJson">⬇️ Backup (JSON)</button><label class="btn ghost">⬆️ Import<input type="file" id="imJson" accept=".json,application/json" hidden></label>
-  <button class="btn ghost" id="exCsv">📄 Tagebuch CSV</button><button class="btn ghost" id="exCsvW">📄 Gewicht CSV</button></div>
-  <button class="btn ghost block" id="demo" style="margin-top:8px">🧪 Demo-Daten laden (6 Wochen)</button>
+  <div class="card"><h3><span>${I('database')}Daten</span></h3><div class="small mut" style="margin-bottom:10px">Alles bleibt auf diesem Gerät – kein Konto, keine Cloud, keine Paywall. Mach ab und zu ein Backup.</div>
+  <div class="grid2"><button class="btn ghost" id="exJson">${I('download')}Backup (JSON)</button><label class="btn ghost">${I('upload')}Import<input type="file" id="imJson" accept=".json,application/json" hidden></label>
+  <button class="btn ghost" id="exCsv">${I('file')}Tagebuch CSV</button><button class="btn ghost" id="exCsvW">${I('file')}Gewicht CSV</button></div>
+  <button class="btn ghost block" id="demo" style="margin-top:8px">${I('flask')}Demo-Daten laden (6 Wochen)</button>
   <button class="btn danger block" id="wipe" style="margin-top:8px">Alle Daten löschen</button>
   <div class="small mut" style="margin-top:10px">${Object.keys(S.products).length} Produkte offline gespeichert · ${BASE_FOODS.length} Basis-Lebensmittel · Produktdaten von <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener" style="color:var(--acc)">Open Food Facts</a></div></div>
-  <div class="small mut" style="text-align:center;padding:6px 0 20px">FitScan · 100 % kostenlos · Unbegrenzt scannen ❤️</div>`;
+  <div class="small mut" style="text-align:center;padding:6px 0 20px">FitScan · 100 % kostenlos · Unbegrenzt scannen</div>`;
   const read = () => ({ sex: $('#pSex .on').dataset.v, age: +$('#pAge').value, height: +$('#pH').value, weight: +$('#pWt').value, activity: +$('#pAct').value, goal: $('#pGoal .on').dataset.v, rate: +$('#pRate').value });
   const upd = () => { const q = read(), c = computeGoals(q); $('#pRateL').textContent = de(q.rate, 2) + ' kg/Woche'; $('#pRateBox').classList.toggle('hidden', q.goal === 'maintain');
     $('#pCalc').innerHTML = `Grundumsatz ${de(c.bmr)} kcal · Gesamtumsatz ≈ ${de(c.tdee)} kcal<br>→ Ziel <b style="color:var(--txt)">${de(c.kcal)} kcal</b> · P ${c.p} g · KH ${c.c} g · F ${c.f} g`; };

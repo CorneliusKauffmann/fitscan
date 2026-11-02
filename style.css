@@ -135,3 +135,26 @@ main .card{animation:rise .35s cubic-bezier(.2,.8,.2,1) both}
 .ci{background:var(--card2);box-shadow:none}
 .pill{display:flex;flex-direction:column}
 .addrow [data-quick],.addrow [data-mscan]{flex:0 0 48px;padding-left:0;padding-right:0}
+/* v4 icon system */
+.ic{width:1.15em;height:1.15em;flex:none;vertical-align:-.2em;display:inline-block}
+h2 .ic,h3 .ic{color:var(--acc);margin-right:.45em}
+h3>span{display:inline-flex;align-items:center}
+.btn .ic,.chip .ic{width:16px;height:16px}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center}.icon-btn .ic{width:19px;height:19px}
+.datenav button{display:inline-flex;align-items:center;justify-content:center}.datenav .ic{width:20px;height:20px}
+.tabbar .ti{filter:none;display:flex}.tabbar .ti .ic{width:23px;height:23px}
+.tabbar .fab span{display:flex}.tabbar .fab .ic{width:28px;height:28px;stroke-width:2}
+.empty .e{color:var(--acc);opacity:.8}.empty .e .ic{width:40px;height:40px;stroke-width:1.5}
+.star{color:var(--mut)}.star .ic{width:24px;height:24px}.ic.fill{fill:#ffb547;color:#ffb547}
+.ck .ic{width:15px;height:15px;stroke-width:2.5}
+.opt .oi .ic{width:26px;height:26px;color:var(--acc)}
+.streak .ic{color:#ff8a00;margin-right:6px}
+.cta-ic{color:var(--acc);display:flex}.cta-ic .ic{width:26px;height:26px}
+.tray-item .ic{color:var(--acc2);margin-right:6px}
+.scan-mode{display:inline-flex;align-items:center;gap:6px}
+.thumb .ic{width:20px;height:20px;color:var(--mut)}
+.thumb.cat{background:hsl(var(--h) 45% 50% / .16);color:hsl(var(--h) 55% 62%);font-size:13px;font-weight:750;letter-spacing:-.2px}
+[data-theme=light] .thumb.cat{color:hsl(var(--h) 50% 38%)}
+.thumb.cat .ic{color:inherit}
+.qa .ic{width:18px;height:18px}
+.food .qa{display:inline-flex;align-items:center;justify-content:center}
